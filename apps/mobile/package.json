@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "flutter run -d chrome --web-port=3000 --dart-define=API_URL=http://localhost:4000/api/v1",
+    "dev": "flutter run -d web-server --web-port=3000 --web-hostname=localhost --dart-define=API_URL=http://localhost:4000/api/v1",
     "dev:server": "flutter run -d web-server --web-port=3000 --web-hostname=localhost --dart-define=API_URL=http://localhost:4000/api/v1",
+    "dev:chrome": "flutter run -d chrome --web-port=3000 --dart-define=API_URL=http://localhost:4000/api/v1",
     "dev:edge": "flutter run -d edge --web-port=3000 --dart-define=API_URL=http://localhost:4000/api/v1",
     "build:web": "flutter build web --release --dart-define=API_URL=http://localhost:4000/api/v1",
     "test": "flutter test",
