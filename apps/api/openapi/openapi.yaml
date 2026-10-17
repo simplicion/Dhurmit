@@ -1,0 +1,303 @@
+openapi: 3.1.0
+info:
+  title: Committee Ledger API
+  version: 1.0.0
+  description: >
+    Official REST API for Committee Ledger — a mobile-first recordkeeping tool
+    for committee organizers to track schedules, members, collections, and dues.
+servers:
+  - url: http://localhost:4000/api/v1
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: The amount must be greater than zero.
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                  issue:
+                    type: string
+            requestId:
+              type: string
+
+    RegisterRequest:
+      type: object
+      required:
+        - displayName
+        - email
+        - password
+      properties:
+        displayName:
+          type: string
+          example: Suresh Shrestha
+        email:
+          type: string
+          format: email
+          example: suresh@example.com
+        password:
+          type: string
+          format: password
+          example: SuperSecurePass123!
+        phone:
+          type: string
+          example: "+9779841234567"
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: suresh@example.com
+        password:
+          type: string
+          format: password
+          example: SuperSecurePass123!
+
+    CreateCommitteeRequest:
+      type: object
+      required:
+        - name
+        - startDate
+        - duration
+        - schedule
+        - contributionAmountMinor
+      properties:
+        name:
+          type: string
+          example: New Road Merchant Group A
+        currencyCode:
+          type: string
+          default: NPR
+        timezone:
+          type: string
+          default: Asia/Kathmandu
+        startDate:
+          type: string
+          format: date
+          example: "2026-11-01"
+        duration:
+          type: object
+          required:
+            - count
+            - unit
+          properties:
+            count:
+              type: integer
+              example: 10
+            unit:
+              type: string
+              enum: [DAY, MONTH]
+              example: MONTH
+        schedule:
+          type: object
+          required:
+            - frequency
+          properties:
+            frequency:
+              type: string
+              enum: [DAILY, WEEKLY, MONTHLY, CUSTOM]
+              example: MONTHLY
+            rule:
+              type: object
+              properties:
+                dayOfMonth:
+                  type: integer
+                  example: 26
+        contributionAmountMinor:
+          type: integer
+          description: Integer paisa (1 NPR = 100 paisa)
+          example: 200000
+        allowPartialPayment:
+          type: boolean
+          default: false
+        allocationPolicy:
+          type: string
+          enum: [FIFO, MANUAL]
+          default: FIFO
+
+    RecordCollectionRequest:
+      type: object
+      required:
+        - memberId
+        - amountMinor
+        - receivedAt
+      properties:
+        memberId:
+          type: string
+          format: uuid
+        amountMinor:
+          type: integer
+          description: Total amount collected in paisa
+          example: 1200000
+        currencyCode:
+          type: string
+          default: NPR
+        receivedAt:
+          type: string
+          format: date-time
+          example: "2026-11-26T12:00:00+05:45"
+        methodLabel:
+          type: string
+          example: CASH
+        reference:
+          type: string
+          nullable: true
+        note:
+          type: string
+          nullable: true
+        allocations:
+          type: array
+          items:
+            type: object
+            required:
+              - obligationId
+              - amountMinor
+            properties:
+              obligationId:
+                type: string
+                format: uuid
+              amountMinor:
+                type: integer
+
+security:
+  - bearerAuth: []
+
+paths:
+  /auth/register:
+    post:
+      summary: Register organizer account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Account created successfully
+
+  /auth/login:
+    post:
+      summary: Authenticate user
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Tokens returned
+
+  /committees:
+    get:
+      summary: List user's accessible committees
+      responses:
+        '200':
+          description: List of committees
+    post:
+      summary: Create new committee in draft state
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCommitteeRequest'
+      responses:
+        '201':
+          description: Committee created
+
+  /committees/{committeeId}/schedule-preview:
+    post:
+      summary: Preview deterministic due dates and expected totals
+      parameters:
+        - name: committeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Generated schedule preview
+
+  /committees/{committeeId}/activate:
+    post:
+      summary: Activate committee and generate member obligations
+      parameters:
+        - name: committeeId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Committee activated
+
+  /committees/{committeeId}/collections:
+    get:
+      summary: List collections for committee
+      parameters:
+        - name: committeeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Collection history
+    post:
+      summary: Record collection with atomic allocation
+      parameters:
+        - name: committeeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordCollectionRequest'
+      responses:
+        '201':
+          description: Collection and allocations saved atomically

@@ -1,0 +1,83 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  backend-checks:
+    name: Backend Lint, Type Check & Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: committee_ledger_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: apps/api/package.json
+
+      - name: Install Backend Dependencies
+        working-directory: apps/api
+        run: npm ci
+
+      - name: Run Linter & Formatter Check
+        working-directory: apps/api
+        run: npm run lint
+
+      - name: TypeScript Strict Compilation Check
+        working-directory: apps/api
+        run: npm run typecheck
+
+      - name: Run Migrations and Tests
+        working-directory: apps/api
+        env:
+          DATABASE_URL: postgres://postgres:postgrespassword@localhost:5432/committee_ledger_test
+          JWT_ACCESS_SECRET: test_access_secret_key_minimum_32_characters_long
+          JWT_REFRESH_SECRET: test_refresh_secret_key_minimum_32_characters_long
+        run: npm test
+
+  flutter-checks:
+    name: Flutter Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.x'
+          channel: 'stable'
+          cache: true
+
+      - name: Install Flutter Dependencies
+        working-directory: apps/mobile
+        run: flutter pub get
+
+      - name: Analyze Flutter Code
+        working-directory: apps/mobile
+        run: flutter analyze
+
+      - name: Run Flutter Tests
+        working-directory: apps/mobile
+        run: flutter test
