@@ -1,13 +1,14 @@
 import 'dart:js_interop';
 
 @JS('window.launch180BottomSheet')
-external JSBoolean? _launch180BottomSheet(JSString clientId, JSString redirectUri);
+external JSPromise<JSString?> _launch180BottomSheet(JSString clientId, JSString redirectUri);
 
-Future<bool> launch180WebBottomSheet(String clientId, String redirectUri) async {
+Future<String?> launch180WebBottomSheet(String clientId, String redirectUri) async {
   try {
-    final result = _launch180BottomSheet(clientId.toJS, redirectUri.toJS);
-    return result?.toDart ?? false;
+    final promise = _launch180BottomSheet(clientId.toJS, redirectUri.toJS);
+    final result = await promise.toDart;
+    return result?.toDart;
   } catch (_) {
-    return false;
+    return null;
   }
 }

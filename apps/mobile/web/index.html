@@ -35,22 +35,70 @@
   <!-- 180 Core SDK (Universal Identity SSO & Bottom Sheet Engine) -->
   <script src="https://profile.180core.cloud/sdk/v1/180-core-sdk.js"></script>
   <script>
-    window.launch180BottomSheet = function(clientId, redirectUri) {
-      try {
-        if (window.OneEighty && window.OneEighty.auth && window.OneEighty.auth.signIn) {
-          window.OneEighty.auth.signIn({
-            clientId: clientId,
-            redirectUri: redirectUri,
-            authServerUrl: 'https://auth.180workspace.com',
-            uxMode: 'bottom_sheet',
-            environment: 'production'
-          });
-          return true;
-        }
-      } catch (e) {
-        console.warn('180 SDK launch error:', e);
+    function handle180Success(data) {
+      if (!data) return;
+      console.log('[180 Identity SSO Success]', data);
+      var code = data.code || data.token || data.accessToken || data.authToken || '';
+      var user = data.user || null;
+
+      // 1. If Flutter has registered an in-memory bridge callback, invoke it directly
+      if (window.__on180LoginSuccess) {
+        try {
+          window.__on180LoginSuccess(JSON.stringify({ code: code, token: code, user: user }));
+        } catch (_) {}
       }
-      return false;
+
+      // 2. Also forward via hash route so GoRouter routes to AuthCallbackScreen
+      if (code) {
+        var callbackUrl = window.location.origin + '/#/auth/callback?code=' + encodeURIComponent(code);
+        if (window.location.hash.indexOf(code) === -1) {
+          window.location.href = callbackUrl;
+        }
+      }
+    }
+
+    // Listen to direct window postMessages from 180 Identity iframe
+    window.addEventListener('message', function(event) {
+      var d = event.data;
+      if (!d) return;
+      if (typeof d === 'string') {
+        try { d = JSON.parse(d); } catch (_) { return; }
+      }
+      if (d && (d.type === '180_IDENTITY_SUCCESS' || d.type === '180_AUTH_SUCCESS')) {
+        handle180Success(d);
+      }
+    });
+
+    window.launch180BottomSheet = function(clientId, redirectUri) {
+      return new Promise(function(resolve) {
+        try {
+          if (window.OneEighty && window.OneEighty.auth && window.OneEighty.auth.signIn) {
+            window.OneEighty.auth.signIn({
+              clientId: clientId,
+              redirectUri: redirectUri,
+              authServerUrl: 'https://auth.180workspace.com',
+              uxMode: 'bottom_sheet',
+              environment: 'production',
+              onSuccess: function(res) {
+                handle180Success(res);
+                resolve(JSON.stringify(res || { code: '' }));
+              }
+            }).then(function(res) {
+              if (res) {
+                handle180Success(res);
+                resolve(JSON.stringify(res));
+              }
+            }).catch(function(err) {
+              console.warn('[180 SDK Error]', err);
+              resolve('');
+            });
+            return;
+          }
+        } catch (e) {
+          console.warn('180 SDK launch error:', e);
+        }
+        resolve('');
+      });
     };
   </script>
 </head>

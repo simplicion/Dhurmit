@@ -70,9 +70,11 @@ class AuthState extends ChangeNotifier {
     await _persistSession(res);
   }
 
-  Future<void> loginWith180(String code, {String? redirectUri}) async {
+  Future<void> loginWith180(String code, {String? token, Map<String, dynamic>? user, String? redirectUri}) async {
     final res = await apiClient.post('/auth/180/exchange', body: {
       'code': code,
+      if (token != null) 'token': token,
+      if (user != null) 'user': user,
       if (redirectUri != null) 'redirectUri': redirectUri,
     });
 

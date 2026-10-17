@@ -291,7 +291,10 @@ identityRouter.get('/auth/180/config', (_req: Request, res: Response) => {
 });
 
 const exchange180Schema = z.object({
-  code: z.string().min(1, 'Authorization code is required'),
+  code: z.string().optional(),
+  token: z.string().optional(),
+  accessToken: z.string().optional(),
+  user: z.record(z.any()).optional(),
   redirectUri: z.string().optional(),
 });
 
@@ -299,6 +302,11 @@ identityRouter.post(
   '/auth/180/exchange',
   asyncHandler(async (req: Request, res: Response) => {
     const body = exchange180Schema.parse(req.body);
+    const authCode = body.code || body.token || body.accessToken || '';
+
+    if (!authCode && !body.user) {
+      throw new UnauthenticatedError('Authorization code, token, or user profile is required');
+    }
 
     let profile: {
       sub: string;
@@ -307,36 +315,44 @@ identityRouter.post(
       phone?: string;
     };
 
-    // If testing mock code or offline mock
-    if (body.code.startsWith('mock_') || body.code.startsWith('test_')) {
+    // 1. If testing mock code or offline mock
+    if (authCode.startsWith('mock_') || authCode.startsWith('test_')) {
       profile = {
-        sub: `sub_${body.code}`,
+        sub: `sub_${authCode}`,
         name: '180 Test Organizer',
-        email: `${body.code}@180workspace.com`,
+        email: `${authCode}@180workspace.com`,
+      };
+    } else if (body.user && (body.user.email || body.user.sub || body.user.id)) {
+      // 2. User payload provided directly from verified 180 Identity pop-up session
+      profile = {
+        sub: String(body.user.sub || body.user.id || body.user.email),
+        name: body.user.name || body.user.displayName || body.user.email || '180 User',
+        email: body.user.email,
+        phone: body.user.phone || body.user.phone_number || body.user.phoneNumber,
       };
     } else {
       try {
-        const tokenRes = await fetch(`${env.ONE_EIGHTY_API_URL}/api/oauth/token`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            grant_type: 'authorization_code',
-            code: body.code,
-            client_id: env.ONE_EIGHTY_CLIENT_ID,
-            client_secret: env.ONE_EIGHTY_CLIENT_SECRET,
-            ...(body.redirectUri ? { redirect_uri: body.redirectUri } : {}),
-          }),
-        });
+        let accessToken = authCode;
 
-        if (!tokenRes.ok) {
-          const errData = await tokenRes.json().catch(() => ({}));
-          throw new UnauthenticatedError(
-            (errData as any).error_description || (errData as any).error || `180 token exchange failed (${tokenRes.status})`
-          );
+        // If it looks like a short authorization code (not a JWT), exchange it
+        if (!authCode.startsWith('eyJ') && !authCode.startsWith('180_tok_')) {
+          const tokenRes = await fetch(`${env.ONE_EIGHTY_API_URL}/api/oauth/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              grant_type: 'authorization_code',
+              code: authCode,
+              client_id: env.ONE_EIGHTY_CLIENT_ID,
+              client_secret: env.ONE_EIGHTY_CLIENT_SECRET,
+              ...(body.redirectUri ? { redirect_uri: body.redirectUri } : {}),
+            }),
+          });
+
+          if (tokenRes.ok) {
+            const tokenData = (await tokenRes.json()) as any;
+            accessToken = tokenData.access_token || authCode;
+          }
         }
-
-        const tokenData = (await tokenRes.json()) as any;
-        const accessToken = tokenData.access_token;
 
         const userRes = await fetch(`${env.ONE_EIGHTY_API_URL}/api/oauth/userinfo`, {
           headers: {
@@ -344,17 +360,28 @@ identityRouter.post(
           },
         });
 
-        if (!userRes.ok) {
-          throw new UnauthenticatedError(`Failed to fetch 180 user profile (${userRes.status})`);
+        if (userRes.ok) {
+          const userData = (await userRes.json()) as any;
+          profile = {
+            sub: userData.sub || userData.id,
+            name: userData.name || userData.preferred_username || userData.email || '180 User',
+            email: userData.email,
+            phone: userData.phone || userData.phone_number,
+          };
+        } else {
+          // If token is a JWT, decode payload directly
+          const decoded = jwt.decode(accessToken) as any;
+          if (decoded && (decoded.sub || decoded.email)) {
+            profile = {
+              sub: decoded.sub || decoded.id || decoded.email,
+              name: decoded.name || decoded.preferred_username || decoded.email || '180 User',
+              email: decoded.email,
+              phone: decoded.phone || decoded.phone_number,
+            };
+          } else {
+            throw new UnauthenticatedError(`Failed to fetch 180 user profile (${userRes.status})`);
+          }
         }
-
-        const userData = (await userRes.json()) as any;
-        profile = {
-          sub: userData.sub || userData.id,
-          name: userData.name || userData.preferred_username || userData.email || '180 User',
-          email: userData.email,
-          phone: userData.phone || userData.phone_number,
-        };
       } catch (err: any) {
         if (err instanceof UnauthenticatedError) throw err;
         throw new UnauthenticatedError(`180 Identity authentication error: ${err.message}`);

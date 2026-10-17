@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../core/api/auth_state.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/one_eighty_auth_button.dart';
-
 import '../../../core/widgets/one_eighty_launcher.dart';
 
 /// Primary Splash Screen for Dhurmit.
@@ -30,13 +32,39 @@ class _LoginScreenState extends State<LoginScreen> {
           : 'http://localhost:3000';
       final redirectUri = '$origin/auth/callback';
 
-      // 1. Try launching 180 SDK native bottom sheet modal on Web
-      final launchedInPage = await trigger180WebBottomSheet(clientId, redirectUri);
-      if (launchedInPage) {
-        return;
+      // 1. Launch 180 SDK native bottom sheet modal on Web
+      final authResultJson = await trigger180WebBottomSheet(clientId, redirectUri);
+      if (!mounted) return;
+
+      if (authResultJson != null && authResultJson.isNotEmpty) {
+        final authState = context.read<AuthState>();
+        String? authCode;
+        Map<String, dynamic>? userPayload;
+
+        try {
+          final data = jsonDecode(authResultJson) as Map<String, dynamic>;
+          authCode = (data['code'] ?? data['token'] ?? data['accessToken'] ?? data['authToken'])?.toString();
+          if (data['user'] is Map<String, dynamic>) {
+            userPayload = data['user'] as Map<String, dynamic>;
+          }
+        } catch (_) {
+          authCode = authResultJson;
+        }
+
+        if ((authCode != null && authCode.isNotEmpty) || userPayload != null) {
+          await authState.loginWith180(
+            authCode ?? '180_session_verified',
+            user: userPayload,
+            redirectUri: redirectUri,
+          );
+          if (mounted) {
+            context.go('/home');
+          }
+          return;
+        }
       }
 
-      // 2. Direct OAuth redirect/app launch fallback (for mobile native and web)
+      // 2. Direct OAuth redirect fallback
       final ssoUrl = Uri.parse(
         'https://auth.180workspace.com/auth/login?client_id=$clientId&redirect_uri=${Uri.encodeComponent(redirectUri)}&response_type=code&scope=openid%20identity:read%20identity:email%20identity:phone&ux_mode=bottom_sheet',
       );
@@ -50,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to initiate 180 Identity: $e'),
+          content: Text('Failed to complete 180 Identity sign-in: $e'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
