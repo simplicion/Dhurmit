@@ -33,7 +33,25 @@
   <link rel="manifest" href="manifest.json">
 
   <!-- 180 Core SDK (Universal Identity SSO & Bottom Sheet Engine) -->
-  <script src="https://profile.180core.cloud/sdk/v1/180-core-sdk.js" async></script>
+  <script src="https://profile.180core.cloud/sdk/v1/180-core-sdk.js"></script>
+  <script>
+    window.launch180BottomSheet = function(clientId, redirectUri) {
+      try {
+        if (window.OneEighty && window.OneEighty.auth && window.OneEighty.auth.signIn) {
+          window.OneEighty.auth.signIn({
+            clientId: clientId,
+            redirectUri: redirectUri,
+            uxMode: 'bottom_sheet',
+            environment: 'production'
+          });
+          return true;
+        }
+      } catch (e) {
+        console.warn('180 SDK launch error:', e);
+      }
+      return false;
+    };
+  </script>
 </head>
 <body>
   <!--

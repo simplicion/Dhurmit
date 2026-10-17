@@ -75,7 +75,7 @@ void main() {
       expect(find.text('Sign In'), findsNothing);
     });
 
-    testWidgets('Tapping Continue with 180 Profile opens the 180 Identity SSO modal sheet', (tester) async {
+    testWidgets('Tapping Continue with 180 Profile initiates direct 180 sign-in without intermediate modal', (tester) async {
       await tester.pumpWidget(wrapAppShell(
         const LoginScreen(),
         syncEngine: syncEngine,
@@ -87,11 +87,11 @@ void main() {
 
       await tester.ensureVisible(button);
       await tester.tap(button);
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      expect(find.text('180 Identity SSO'), findsOneWidget);
-      expect(find.text('Launch 180 Sovereign Sign-In'), findsOneWidget);
-      expect(find.text('Verify & Enter App'), findsOneWidget);
+      // No redundant Flutter modal sheet is opened
+      expect(find.text('Verify & Enter App'), findsNothing);
+      expect(find.text('Launch 180 Sovereign Sign-In'), findsNothing);
     });
 
     testWidgets('SettingsScreen displays theme options and switches active theme on tap', (tester) async {

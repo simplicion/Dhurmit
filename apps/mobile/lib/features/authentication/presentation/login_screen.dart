@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../core/api/auth_state.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/one_eighty_auth_button.dart';
+
+import '../../../core/widgets/one_eighty_launcher.dart';
 
 /// Primary Splash Screen for Dhurmit.
 /// Clean, minimalist, and focused:
 /// - Official Dhurmit branding logo
 /// - Two-line concise description of what the app actually does
-/// - Official 180 Identity SSO Button opening the in-app bottom sheet
+/// - Official 180 Identity SSO Button opening 180 Identity bottom sheet directly
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,187 +21,42 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
 
-  void _show180IdentityBottomSheet() {
-    final tokens = context.read<ThemeProvider>().tokens;
-    final authState = context.read<AuthState>();
-    final codeController = TextEditingController();
+  Future<void> _handle180SignIn() async {
+    setState(() => _isLoading = true);
+    try {
+      const clientId = '180_client_3b759b500c4b8a04f888ec3d91a82bd3';
+      final origin = Uri.base.origin.contains('http')
+          ? Uri.base.origin
+          : 'http://localhost:3000';
+      final redirectUri = '$origin/auth/callback';
 
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: tokens.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      builder: (bottomSheetContext) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 24,
-            bottom: MediaQuery.of(bottomSheetContext).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: tokens.outlineVariant,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Container(
-                    height: 48,
-                    width: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: const Color(0xFF334155)),
-                    ),
-                    padding: const EdgeInsets.all(8),
-                    child: Image.asset(
-                      'assets/images/180_icon.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Center(
-                        child: Text(
-                          '180',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '180 Identity SSO',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: tokens.onBackground,
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Universal WhatsApp OTP & Biometric Passkey',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: tokens.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4F46E5),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  elevation: 1,
-                ),
-                icon: const Icon(Icons.open_in_browser_rounded, size: 20),
-                label: const Text(
-                  'Launch 180 Sovereign Sign-In',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                ),
-                onPressed: () async {
-                  const clientId = '180_client_3b759b500c4b8a04f888ec3d91a82bd3';
-                  final origin = Uri.base.origin.contains('http')
-                      ? Uri.base.origin
-                      : 'http://localhost:3000';
-                  final redirectUri = '$origin/auth/callback';
-                  final ssoUrl = Uri.parse(
-                    'https://auth.180workspace.com/auth/login?client_id=$clientId&redirect_uri=${Uri.encodeComponent(redirectUri)}&response_type=code&scope=openid%20identity:read%20identity:email%20identity:phone&ux_mode=bottom_sheet',
-                  );
-                  if (await canLaunchUrl(ssoUrl)) {
-                    await launchUrl(ssoUrl, mode: LaunchMode.externalApplication);
-                  }
-                },
-              ),
-              const SizedBox(height: 18),
-              Row(
-                children: [
-                  Expanded(child: Divider(color: tokens.outlineVariant)),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Text(
-                      'OR VERIFY AUTHORIZATION CODE',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: tokens.onSurfaceVariant,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                  Expanded(child: Divider(color: tokens.outlineVariant)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: codeController,
-                decoration: const InputDecoration(
-                  labelText: 'Authorization Code',
-                  hintText: 'e.g. test_organizer or 180 auth code',
-                  prefixIcon: Icon(Icons.key_rounded),
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                icon: const Icon(Icons.check_circle_outline_rounded),
-                label: const Text('Verify & Enter App', style: TextStyle(fontWeight: FontWeight.bold)),
-                onPressed: () async {
-                  final code = codeController.text.trim();
-                  if (code.isEmpty) return;
-                  Navigator.of(bottomSheetContext).pop();
-                  setState(() => _isLoading = true);
-                  try {
-                    await authState.loginWith180(code);
-                  } catch (e) {
-                    if (!mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(e.toString()),
-                        backgroundColor: Theme.of(context).colorScheme.error,
-                      ),
-                    );
-                  } finally {
-                    if (mounted) setState(() => _isLoading = false);
-                  }
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
+      // 1. Try launching 180 SDK native bottom sheet modal on Web
+      final launchedInPage = await trigger180WebBottomSheet(clientId, redirectUri);
+      if (launchedInPage) {
+        return;
+      }
+
+      // 2. Direct OAuth redirect/app launch fallback (for mobile native and web)
+      final ssoUrl = Uri.parse(
+        'https://auth.180workspace.com/auth/login?client_id=$clientId&redirect_uri=${Uri.encodeComponent(redirectUri)}&response_type=code&scope=openid%20identity:read%20identity:email%20identity:phone&ux_mode=bottom_sheet',
+      );
+
+      if (await canLaunchUrl(ssoUrl)) {
+        await launchUrl(ssoUrl, mode: LaunchMode.externalApplication);
+      } else {
+        throw Exception('Could not launch 180 Sovereign Sign-In');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to initiate 180 Identity: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -294,7 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading: _isLoading,
                     title: 'Continue with 180 Profile',
                     subtitle: 'Universal WhatsApp OTP & Biometric Passkey',
-                    onPressed: _show180IdentityBottomSheet,
+                    onPressed: _handle180SignIn,
                   ),
 
                   const SizedBox(height: 20),
