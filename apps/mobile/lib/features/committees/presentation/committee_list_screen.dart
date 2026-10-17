@@ -57,9 +57,39 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          workspaceName,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        title: Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 4,
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(2),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.asset(
+                  'assets/images/icon.png',
+                  height: 28,
+                  width: 28,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                workspaceName,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(

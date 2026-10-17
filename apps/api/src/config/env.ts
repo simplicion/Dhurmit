@@ -17,6 +17,11 @@ const envSchema = z.object({
   JWT_REFRESH_TTL_SECONDS: z.coerce.number().default(604800),
   CORS_ALLOWED_ORIGINS: z.string().default('*'),
   SENTRY_DSN: z.string().optional().default(''),
+  ONE_EIGHTY_CLIENT_ID: z.string().default('180_client_3b759b500c4b8a04f888ec3d91a82bd3'),
+  ONE_EIGHTY_CLIENT_SECRET: z.string().default('180_secret_c09a40cfc3e5c8acc1dd24ffd499dcd90e2b2773488c2f035765beb8a28eb7f5'),
+  ONE_EIGHTY_WEBHOOK_SECRET: z.string().default('whsec_4ea6988e7fca03a2bdb4f7f4316814659a1e056aeb82ce35'),
+  ONE_EIGHTY_AUTH_URL: z.string().default('https://auth.180workspace.com'),
+  ONE_EIGHTY_API_URL: z.string().default('https://api.180core.cloud'),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
@@ -44,6 +49,11 @@ try {
     JWT_REFRESH_TTL_SECONDS: 604800,
     CORS_ALLOWED_ORIGINS: '*',
     SENTRY_DSN: '',
+    ONE_EIGHTY_CLIENT_ID: process.env['180_CLIENT_ID'] || process.env['ONE_EIGHTY_CLIENT_ID'] || '180_client_3b759b500c4b8a04f888ec3d91a82bd3',
+    ONE_EIGHTY_CLIENT_SECRET: process.env['180_CLIENT_SECRET'] || process.env['ONE_EIGHTY_CLIENT_SECRET'] || '180_secret_c09a40cfc3e5c8acc1dd24ffd499dcd90e2b2773488c2f035765beb8a28eb7f5',
+    ONE_EIGHTY_WEBHOOK_SECRET: process.env['180_WEBHOOK_SECRET'] || process.env['ONE_EIGHTY_WEBHOOK_SECRET'] || 'whsec_4ea6988e7fca03a2bdb4f7f4316814659a1e056aeb82ce35',
+    ONE_EIGHTY_AUTH_URL: process.env['ONE_EIGHTY_AUTH_URL'] || 'https://auth.180workspace.com',
+    ONE_EIGHTY_API_URL: process.env['ONE_EIGHTY_API_URL'] || 'https://api.180core.cloud',
   };
 }
 

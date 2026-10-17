@@ -1,0 +1,18 @@
+{
+  "name": "committee-ledger",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Committee Ledger - Mobile-first Committee Recordkeeping & Administration Tool",
+  "scripts": {
+    "dev": "concurrently -k -p \"[{name}]\" -n \"api,mobile\" -c \"cyan.bold,magenta.bold\" \"pnpm --filter committee-ledger-api dev\" \"pnpm --filter committee-ledger-mobile dev\"",
+    "dev:server": "concurrently -k -p \"[{name}]\" -n \"api,mobile\" -c \"cyan.bold,magenta.bold\" \"pnpm --filter committee-ledger-api dev\" \"pnpm --filter committee-ledger-mobile dev:server\"",
+    "dev:api": "pnpm --filter committee-ledger-api dev",
+    "dev:mobile": "pnpm --filter committee-ledger-mobile dev",
+    "dev:parallel": "pnpm -r --parallel run dev",
+    "test": "pnpm --filter committee-ledger-api test && pnpm --filter committee-ledger-mobile test",
+    "build": "pnpm --filter committee-ledger-api build && pnpm --filter committee-ledger-mobile build:web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

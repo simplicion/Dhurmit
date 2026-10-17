@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/api/auth_state.dart';
 import '../../features/authentication/presentation/login_screen.dart';
+import '../../features/authentication/presentation/auth_callback_screen.dart';
 import '../../features/home/presentation/home_dashboard_screen.dart';
 import '../../features/committees/presentation/create_committee_screen.dart';
 import '../../features/committees/presentation/committee_dashboard_screen.dart';
@@ -17,9 +18,17 @@ GoRouter createRouter(AuthState authState) {
       if (authState.isLoading) return null;
 
       final isLoggingIn = state.matchedLocation == '/login';
+      final isCallback = state.matchedLocation == '/auth/callback';
       final isLoggedIn = authState.isAuthenticated;
+      final authCode = state.uri.queryParameters['code'];
 
-      if (!isLoggedIn && !isLoggingIn) {
+      // If an authorization code is present in query parameters (e.g. from 180 OAuth redirect),
+      // forward directly to callback handler
+      if (authCode != null && authCode.isNotEmpty && !isCallback && !isLoggedIn) {
+        return '/auth/callback?code=$authCode';
+      }
+
+      if (!isLoggedIn && !isLoggingIn && !isCallback) {
         return '/login';
       }
 
@@ -33,6 +42,13 @@ GoRouter createRouter(AuthState authState) {
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/auth/callback',
+        builder: (context, state) {
+          final code = state.uri.queryParameters['code'];
+          return AuthCallbackScreen(code: code);
+        },
       ),
       GoRoute(
         path: '/home',

@@ -4,6 +4,7 @@ import '../../../core/api/auth_state.dart';
 import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/primary_button.dart';
+import '../../../core/sync/sync_engine.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -189,6 +190,93 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
+          // Offline Sync & Outbox Queue Card
+          Consumer<SyncEngine>(
+            builder: (context, syncEngine, _) {
+              return Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: tokens.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: tokens.outlineVariant),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.sync_rounded, color: tokens.primary),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Offline Sync & Storage',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: tokens.onSurface,
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: syncEngine.isOnline ? tokens.paidOnTimeContainer : tokens.paidLateContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            syncEngine.isOnline ? 'Online' : 'Offline',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: syncEngine.isOnline ? tokens.paidOnTime : tokens.paidLate,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'All records, collections, and statements can be entered offline. When connectivity is restored, queued mutations sync automatically with the PostgreSQL server.',
+                      style: TextStyle(fontSize: 12, color: tokens.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Queued Changes: ${syncEngine.pendingCount}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: tokens.onSurface,
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: tokens.primary,
+                            foregroundColor: tokens.onPrimary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          ),
+                          onPressed: syncEngine.isOnline && syncEngine.pendingCount > 0 && syncEngine.state != SyncEngineState.syncing
+                              ? () => syncEngine.syncNow()
+                              : null,
+                          icon: syncEngine.state == SyncEngineState.syncing
+                              ? const SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Icon(Icons.sync, size: 16),
+                          label: Text(syncEngine.state == SyncEngineState.syncing ? 'Syncing...' : 'Sync Now'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 20),
+
           // Legal & Boundary Notice Card
           Container(
             padding: const EdgeInsets.all(16),
@@ -259,9 +347,26 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Center(
-            child: Text(
-              'Committee Ledger v1.0.0 (Nepal Edition)',
-              style: TextStyle(fontSize: 11, color: tokens.onSurfaceVariant),
+            child: Column(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    'assets/images/logo.png',
+                    height: 52,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Dhurmit Committee Management v1.0.0',
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: tokens.onSurface),
+                ),
+                Text(
+                  'Nepal Edition',
+                  style: TextStyle(fontSize: 11, color: tokens.onSurfaceVariant),
+                ),
+              ],
             ),
           ),
         ],

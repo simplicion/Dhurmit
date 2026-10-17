@@ -7,6 +7,9 @@ import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/money_input_field.dart';
+import '../../../core/sync/sync_engine.dart';
+import '../../../core/sync/sync_outbox_item.dart';
+import '../../../core/sync/offline_cache_store.dart';
 
 class RecordCollectionBottomSheet extends StatefulWidget {
   final String committeeId;
@@ -57,13 +60,24 @@ class _RecordCollectionBottomSheetState extends State<RecordCollectionBottomShee
 
   Future<void> _fetchMembers() async {
     try {
+      final cacheStore = context.read<OfflineCacheStore>();
+      final cached = cacheStore.getCachedMembers(widget.committeeId);
+      if (cached.isNotEmpty && mounted) {
+        setState(() {
+          _members = cached;
+          _isLoadingMembers = false;
+        });
+      }
+
       final client = context.read<AuthState>().apiClient;
       final res = await client.get('/committees/${widget.committeeId}/members?status=ACTIVE');
       if (mounted) {
+        final list = res is List ? res : <dynamic>[];
         setState(() {
-          _members = res is List ? res : [];
+          _members = list;
           _isLoadingMembers = false;
         });
+        await cacheStore.cacheMembers(widget.committeeId, list.cast<Map<String, dynamic>>());
       }
     } catch (_) {
       if (mounted) setState(() => _isLoadingMembers = false);
@@ -117,22 +131,45 @@ class _RecordCollectionBottomSheetState extends State<RecordCollectionBottomShee
 
     setState(() => _isSubmitting = true);
 
+    final syncEngine = context.read<SyncEngine>();
+    final receivedAtIso = _receivedDate.toUtc().toIso8601String();
+
+    final payload = {
+      'memberId': _selectedMemberId,
+      'amountMinor': _amountPaisa.toInt(),
+      'currencyCode': 'NPR',
+      'receivedAt': receivedAtIso,
+      'methodLabel': _methodLabel,
+      'reference': _referenceController.text.trim().isEmpty ? null : _referenceController.text.trim(),
+      'note': _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
+    };
+
+    if (!syncEngine.isOnline) {
+      await syncEngine.enqueueMutation(
+        mutationType: SyncMutationType.recordCollection,
+        endpoint: '/committees/${widget.committeeId}/collections',
+        payload: payload,
+        customIdempotencyKey: _idempotencyKey,
+      );
+
+      if (!mounted) return;
+      Navigator.pop(context);
+      widget.onSuccess();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Offline: Collection recorded & queued for automatic sync!'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
     try {
       final client = context.read<AuthState>().apiClient;
-      final receivedAtIso = _receivedDate.toUtc().toIso8601String();
-
       await client.post(
         '/committees/${widget.committeeId}/collections',
         idempotencyKey: _idempotencyKey,
-        body: {
-          'memberId': _selectedMemberId,
-          'amountMinor': _amountPaisa.toInt(),
-          'currencyCode': 'NPR',
-          'receivedAt': receivedAtIso,
-          'methodLabel': _methodLabel,
-          'reference': _referenceController.text.trim().isEmpty ? null : _referenceController.text.trim(),
-          'note': _noteController.text.trim().isEmpty ? null : _noteController.text.trim(),
-        },
+        body: payload,
       );
 
       if (!mounted) return;
@@ -145,9 +182,22 @@ class _RecordCollectionBottomSheetState extends State<RecordCollectionBottomShee
         ),
       );
     } catch (e) {
+      // Network interruption fallback: queue offline
+      await syncEngine.enqueueMutation(
+        mutationType: SyncMutationType.recordCollection,
+        endpoint: '/committees/${widget.committeeId}/collections',
+        payload: payload,
+        customIdempotencyKey: _idempotencyKey,
+      );
+
       if (!mounted) return;
+      Navigator.pop(context);
+      widget.onSuccess();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Network dropped: Saved offline and queued for automatic sync.'),
+          backgroundColor: Colors.orange,
+        ),
       );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);

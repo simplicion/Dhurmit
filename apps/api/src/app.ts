@@ -30,9 +30,11 @@ export function createApp(): Express {
   app.use(requestIdMiddleware);
 
   // Health checks
-  app.get('/health/live', (_req: Request, res: Response) => {
+  const healthHandler = (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok', uptime: process.uptime() });
-  });
+  };
+  app.get('/health', healthHandler);
+  app.get('/health/live', healthHandler);
 
   app.get('/health/ready', async (_req: Request, res: Response) => {
     const isDbReady = await checkDatabaseHealth();
@@ -45,6 +47,7 @@ export function createApp(): Express {
 
   // API v1 Routes
   const apiV1 = express.Router();
+  apiV1.get('/health', healthHandler);
   apiV1.use(identityRouter);
   apiV1.use(workspacesRouter);
   apiV1.use(committeesRouter);

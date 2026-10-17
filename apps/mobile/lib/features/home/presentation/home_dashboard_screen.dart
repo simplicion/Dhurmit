@@ -5,6 +5,8 @@ import '../../committees/presentation/committee_list_screen.dart';
 import '../../reports/presentation/reports_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 
+import '../../../core/widgets/sync_status_banner.dart';
+
 class HomeDashboardScreen extends StatefulWidget {
   const HomeDashboardScreen({super.key});
 
@@ -26,9 +28,18 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final tokens = context.watch<ThemeProvider>().tokens;
 
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SyncStatusBanner(),
+            Expanded(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: _screens,
+              ),
+            ),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,

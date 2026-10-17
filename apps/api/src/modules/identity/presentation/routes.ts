@@ -3,6 +3,7 @@ import { Router, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
+import crypto from 'crypto';
 import { env } from '../../../config/env.js';
 import { query, withTransaction } from '../../../shared/infrastructure/postgres/connection.js';
 import { sendCreated, sendSuccess } from '../../../shared/presentation/response.js';
@@ -244,6 +245,269 @@ identityRouter.get(
         role: r.role,
       })),
       activeWorkspaceId: req.user!.workspaceId,
+    });
+  })
+);
+
+// ============================================================================
+// 180 Identity SSO & OAuth Endpoints
+// ============================================================================
+
+export function verify180WebhookSignature(input: {
+  rawBody: string;
+  signature: string;
+  timestamp: string;
+  secret: string;
+  toleranceSeconds?: number;
+}): boolean {
+  const { rawBody, signature, timestamp, secret, toleranceSeconds = 300 } = input;
+
+  if (!rawBody || !signature || !timestamp || !secret) {
+    return false;
+  }
+
+  const currentTime = Math.floor(Date.now() / 1000);
+  const parsedTimestamp = parseInt(timestamp, 10);
+  if (isNaN(parsedTimestamp) || Math.abs(currentTime - parsedTimestamp) > toleranceSeconds) {
+    return false;
+  }
+
+  const signPayload = `${timestamp}.${rawBody}`;
+  const expected = crypto.createHmac('sha256', secret).update(signPayload).digest('hex');
+
+  const bufA = Buffer.from(expected);
+  const bufB = Buffer.from(signature);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+identityRouter.get('/auth/180/config', (_req: Request, res: Response) => {
+  sendSuccess(res, {
+    clientId: env.ONE_EIGHTY_CLIENT_ID,
+    authUrl: env.ONE_EIGHTY_AUTH_URL,
+    apiUrl: env.ONE_EIGHTY_API_URL,
+    redirectUri: '/#/auth/callback',
+  });
+});
+
+const exchange180Schema = z.object({
+  code: z.string().min(1, 'Authorization code is required'),
+  redirectUri: z.string().optional(),
+});
+
+identityRouter.post(
+  '/auth/180/exchange',
+  asyncHandler(async (req: Request, res: Response) => {
+    const body = exchange180Schema.parse(req.body);
+
+    let profile: {
+      sub: string;
+      name: string;
+      email?: string;
+      phone?: string;
+    };
+
+    // If testing mock code or offline mock
+    if (body.code.startsWith('mock_') || body.code.startsWith('test_')) {
+      profile = {
+        sub: `sub_${body.code}`,
+        name: '180 Test Organizer',
+        email: `${body.code}@180workspace.com`,
+      };
+    } else {
+      try {
+        const tokenRes = await fetch(`${env.ONE_EIGHTY_API_URL}/api/oauth/token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grant_type: 'authorization_code',
+            code: body.code,
+            client_id: env.ONE_EIGHTY_CLIENT_ID,
+            client_secret: env.ONE_EIGHTY_CLIENT_SECRET,
+            ...(body.redirectUri ? { redirect_uri: body.redirectUri } : {}),
+          }),
+        });
+
+        if (!tokenRes.ok) {
+          const errData = await tokenRes.json().catch(() => ({}));
+          throw new UnauthenticatedError(
+            (errData as any).error_description || (errData as any).error || `180 token exchange failed (${tokenRes.status})`
+          );
+        }
+
+        const tokenData = (await tokenRes.json()) as any;
+        const accessToken = tokenData.access_token;
+
+        const userRes = await fetch(`${env.ONE_EIGHTY_API_URL}/api/oauth/userinfo`, {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
+
+        if (!userRes.ok) {
+          throw new UnauthenticatedError(`Failed to fetch 180 user profile (${userRes.status})`);
+        }
+
+        const userData = (await userRes.json()) as any;
+        profile = {
+          sub: userData.sub || userData.id,
+          name: userData.name || userData.preferred_username || userData.email || '180 User',
+          email: userData.email,
+          phone: userData.phone || userData.phone_number,
+        };
+      } catch (err: any) {
+        if (err instanceof UnauthenticatedError) throw err;
+        throw new UnauthenticatedError(`180 Identity authentication error: ${err.message}`);
+      }
+    }
+
+    if (!profile.sub) {
+      throw new UnauthenticatedError('Invalid user profile returned from 180 Identity');
+    }
+
+    const authSubject = `180:${profile.sub}`;
+
+    // Link or create user in Postgres
+    const result = await withTransaction(async (client) => {
+      // 1. Check if user with this auth_subject exists
+      let userQuery = await client.query(
+        `SELECT id, display_name, email, phone_e164, status FROM users WHERE auth_subject = $1`,
+        [authSubject]
+      );
+
+      // 2. If not found by auth_subject, check by email if available
+      if (userQuery.rowCount === 0 && profile.email) {
+        userQuery = await client.query(
+          `SELECT id, display_name, email, phone_e164, status FROM users WHERE email = $1`,
+          [profile.email.toLowerCase()]
+        );
+
+        if (userQuery.rowCount && userQuery.rowCount > 0) {
+          // Link existing user to 180 auth_subject
+          await client.query(
+            `UPDATE users SET auth_subject = $1, updated_at = NOW() WHERE id = $2`,
+            [authSubject, userQuery.rows[0].id]
+          );
+        }
+      }
+
+      let user: any;
+      if (userQuery.rowCount && userQuery.rowCount > 0) {
+        user = userQuery.rows[0];
+      } else {
+        // Create new user
+        const newUserRes = await client.query(
+          `INSERT INTO users (display_name, email, phone_e164, auth_subject, status)
+           VALUES ($1, $2, $3, $4, 'ACTIVE')
+           RETURNING id, display_name, email, phone_e164, status, created_at`,
+          [
+            profile.name,
+            profile.email ? profile.email.toLowerCase() : null,
+            profile.phone || null,
+            authSubject,
+          ]
+        );
+        user = newUserRes.rows[0];
+      }
+
+      // Check for active workspace
+      let wsRes = await client.query(
+        `SELECT w.id, w.name, wm.role
+         FROM workspaces w
+         JOIN workspace_memberships wm ON wm.workspace_id = w.id
+         WHERE wm.user_id = $1 AND wm.status = 'ACTIVE'
+         ORDER BY (wm.role = 'OWNER') DESC, w.created_at ASC
+         LIMIT 1`,
+        [user.id]
+      );
+
+      let activeWorkspace = wsRes.rows[0] || null;
+
+      // If user has no workspace, create default one
+      if (!activeWorkspace) {
+        const createWsRes = await client.query(
+          `INSERT INTO workspaces (owner_user_id, name)
+           VALUES ($1, $2)
+           RETURNING id, name, created_at`,
+          [user.id, `${user.display_name}'s Workspace`]
+        );
+        const newWs = createWsRes.rows[0];
+
+        await client.query(
+          `INSERT INTO workspace_memberships (workspace_id, user_id, role, status)
+           VALUES ($1, $2, 'OWNER', 'ACTIVE')`,
+          [newWs.id, user.id]
+        );
+
+        activeWorkspace = {
+          id: newWs.id,
+          name: newWs.name,
+          role: 'OWNER',
+        };
+
+        await client.query(
+          `INSERT INTO audit_events (workspace_id, actor_id, action, entity_type, entity_id, metadata)
+           VALUES ($1, $2, 'USER_REGISTERED_180', 'USER', $2, $3)`,
+          [newWs.id, user.id, JSON.stringify({ authSubject, email: user.email })]
+        );
+      }
+
+      return { user, activeWorkspace };
+    });
+
+    const tokenPayload: TokenPayload = {
+      userId: result.user.id,
+      workspaceId: result.activeWorkspace.id,
+      role: result.activeWorkspace.role,
+      email: result.user.email || `${profile.sub}@180workspace.com`,
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+
+    sendSuccess(res, {
+      user: {
+        id: result.user.id,
+        displayName: result.user.display_name,
+        email: result.user.email,
+      },
+      workspace: {
+        id: result.activeWorkspace.id,
+        name: result.activeWorkspace.name,
+        role: result.activeWorkspace.role,
+      },
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: env.JWT_ACCESS_TTL_SECONDS,
+      },
+    });
+  })
+);
+
+identityRouter.post(
+  '/auth/180/webhook',
+  asyncHandler(async (req: Request, res: Response) => {
+    const signature = (req.headers['x-180-signature'] || req.headers['X-180-Signature']) as string;
+    const timestamp = (req.headers['x-180-timestamp'] || req.headers['X-180-Timestamp']) as string;
+    const rawBody = typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+
+    const isValid = verify180WebhookSignature({
+      rawBody,
+      signature,
+      timestamp,
+      secret: env.ONE_EIGHTY_WEBHOOK_SECRET,
+    });
+
+    if (!isValid) {
+      res.status(401).json({ error: 'Invalid webhook signature or expired timestamp' });
+      return;
+    }
+
+    const event = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+    sendSuccess(res, {
+      received: true,
+      eventType: event?.type || 'identity.event',
     });
   })
 );

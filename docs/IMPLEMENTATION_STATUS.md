@@ -16,19 +16,21 @@ The Committee Ledger application has been verified against all 11 specification 
 
 | Test Category | Suite / Check | Files Tested | Tests Run | Result | Duration |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Backend Domain** | Money Value Object Math | `tests/unit/money.test.ts` | **24** | **PASS** | 16ms |
-| **Backend Domain** | Schedule Generator (Clamping/Leap) | `tests/unit/schedule-generator.test.ts` | **21** | **PASS** | 24ms |
-| **Backend Domain** | Allocation Engine (FIFO/Manual/Partial)| `tests/unit/allocation-engine.test.ts` | **18** | **PASS** | 45ms |
-| **Backend Domain** | Status Calculator (Arrears/Reversals) | `tests/unit/status-calculator.test.ts` | **14** | **PASS** | 88ms |
-| **Backend Integration** | API Health, Auth & Security Gates | `tests/integration/api.test.ts` | **16** | **PASS** | 122ms |
-| **Backend Compilation**| TypeScript Strict Compiler | `tsc -p tsconfig.json` | All source files | **PASS (0 errors)** | 4.2s |
+| **Backend Domain** | Money Value Object Math | `tests/unit/money.test.ts` | **24** | **PASS** | 21ms |
+| **Backend Domain** | Schedule Generator (Clamping/Leap) | `tests/unit/schedule-generator.test.ts` | **21** | **PASS** | 38ms |
+| **Backend Domain** | Allocation Engine (FIFO/Manual/Partial)| `tests/unit/allocation-engine.test.ts` | **18** | **PASS** | 63ms |
+| **Backend Domain** | Status Calculator (Arrears/Reversals) | `tests/unit/status-calculator.test.ts` | **14** | **PASS** | 112ms |
+| **Backend Integration** | API Health, Auth & Security Gates | `tests/integration/api.test.ts` | **16** | **PASS** | 137ms |
+| **Backend Compilation**| TypeScript Strict Compiler | `tsc -p tsconfig.json` | All source files | **PASS (0 errors)** | 5.2s |
 | **Flutter Core** | AppMoney Value Object & Math | `test/money_test.dart` | **12** | **PASS** | 0.8s |
 | **Flutter Theme** | AppColorTokens & Theme Provider | `test/theme_test.dart` | **6** | **PASS** | 0.6s |
 | **Flutter Widgets** | StatusBadge Semantic Indicators | `test/status_badge_test.dart` | **9** | **PASS** | 0.7s |
 | **Flutter Components**| PrimaryButton, MoneyInput, States | `test/reusable_widgets_test.dart` | **9** | **PASS** | 0.9s |
 | **Flutter Flows** | Login & Settings Screens | `test/screens_flow_test.dart` | **3** | **PASS** | 0.8s |
-| **Flutter Analysis** | Strict Static Analysis | `flutter analyze` | Entire project | **PASS (0 issues)** | 5.7s |
-| **TOTALS** | **Comprehensive Quality Gates** | **10 Test Suites** | **132 Tests** | **100% PASS** | — |
+| **Flutter App Shell** | Router, MultiProvider & Initialization | `test/widget_test.dart` | **1** | **PASS** | 0.9s |
+| **Flutter Offline Sync** | Outbox Queue, Cache Store & Sync Engine | `test/sync_test.dart` | **9** | **PASS** | 0.7s |
+| **Flutter Analysis** | Strict Static Analysis | `flutter analyze` | Entire project | **PASS (0 issues)** | 6.1s |
+| **TOTALS** | **Comprehensive Quality Gates** | **12 Test Suites** | **142 Tests** | **100% PASS** | — |
 
 ---
 

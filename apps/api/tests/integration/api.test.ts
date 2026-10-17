@@ -136,4 +136,28 @@ describe('API Foundation, Health & Security Integration Tests', () => {
       expect(res.body.error.code).toBe('UNAUTHENTICATED');
     });
   });
+
+  describe('180 Identity Integration Endpoints', () => {
+    it('returns public 180 client configuration on GET /api/v1/auth/180/config', async () => {
+      const res = await request(app).get('/api/v1/auth/180/config');
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.clientId).toBe('180_client_3b759b500c4b8a04f888ec3d91a82bd3');
+      expect(res.body.data.authUrl).toBeDefined();
+      expect(res.body.data.apiUrl).toBeDefined();
+    });
+
+    it('rejects /api/v1/auth/180/exchange without code in body', async () => {
+      const res = await request(app).post('/api/v1/auth/180/exchange').send({});
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    });
+
+    it('rejects /api/v1/auth/180/webhook without signature headers', async () => {
+      const res = await request(app)
+        .post('/api/v1/auth/180/webhook')
+        .send({ type: 'user.updated' });
+      expect(res.status).toBe(401);
+    });
+  });
 });

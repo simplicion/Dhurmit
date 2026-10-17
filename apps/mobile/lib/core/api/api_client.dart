@@ -22,6 +22,9 @@ class ApiException implements Exception {
 
 class ApiClient {
   static String get defaultBaseUrl {
+    const fromEnv = String.fromEnvironment('API_URL');
+    if (fromEnv.isNotEmpty) return fromEnv;
+    if (kReleaseMode) return 'https://api.dhurmit.app/api/v1';
     if (kIsWeb) return 'http://localhost:4000/api/v1';
     if (Platform.isAndroid) return 'http://10.0.2.2:4000/api/v1';
     return 'http://localhost:4000/api/v1';
@@ -73,6 +76,15 @@ class ApiClient {
       uri,
       headers: _buildHeaders(),
       body: body != null ? jsonEncode(body) : null,
+    );
+    return _handleResponse(response);
+  }
+
+  Future<dynamic> delete(String path, {String? idempotencyKey}) async {
+    final uri = Uri.parse('$baseUrl$path');
+    final response = await http.delete(
+      uri,
+      headers: _buildHeaders(idempotencyKey: idempotencyKey),
     );
     return _handleResponse(response);
   }

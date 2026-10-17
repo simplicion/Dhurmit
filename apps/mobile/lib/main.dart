@@ -7,24 +7,26 @@ import 'core/api/api_client.dart';
 import 'core/api/auth_state.dart';
 import 'core/theme/theme_provider.dart';
 
+import 'core/sync/offline_cache_store.dart';
+import 'core/sync/sync_engine.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Base API configuration (can be overridden via --dart-define=API_URL=...)
-  const String apiUrl = String.fromEnvironment(
-    'API_URL',
-    defaultValue: 'http://localhost:3000/api/v1',
-  );
-
-  final apiClient = ApiClient(baseUrl: apiUrl);
+  final apiClient = ApiClient();
   final authState = AuthState(apiClient: apiClient);
   final themeProvider = ThemeProvider();
+  final cacheStore = await OfflineCacheStore.initialize();
+  final syncEngine = SyncEngine(apiClient: apiClient, cacheStore: cacheStore);
 
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
         ChangeNotifierProvider<AuthState>.value(value: authState),
+        Provider<OfflineCacheStore>.value(value: cacheStore),
+        ChangeNotifierProvider<SyncEngine>.value(value: syncEngine),
       ],
       child: const CommitteeLedgerApp(),
     ),
