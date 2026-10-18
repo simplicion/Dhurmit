@@ -1,0 +1,386 @@
+---
+interface Props {
+  activePath?: string;
+}
+
+const { activePath = '/' } = Astro.props;
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/features/', label: 'Features' },
+  { href: '/how-it-works/', label: 'How It Works' },
+  { href: '/contact/', label: 'Contact' },
+];
+---
+
+<header class="site-header">
+  <div class="container header-container">
+    <a href="/" class="brand-link" aria-label="Dhurmit - Committee & Dhukuti Ledger Home">
+      <img src="/logo.png" alt="Dhurmit Official Product Logo" class="brand-logo" width="36" height="36" />
+      <span class="brand-name">Dhurmit<span class="brand-dot">.</span></span>
+      <span class="brand-tag">LEDGER</span>
+      <span class="brand-company-badge" title="Official Product of Simplicion">
+        <span class="company-by">by</span>
+        <img src="/company/icon-black.svg" alt="Simplicion Emblem" class="company-logo-emblem" width="16" height="16" />
+        <span class="company-name">SIMPLICION</span>
+      </span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="Primary Navigation">
+      <ul class="nav-list">
+        {navLinks.map((link) => (
+          <li>
+            <a 
+              href={link.href} 
+              class={`nav-link ${activePath === link.href || activePath === link.href.replace(/\/$/, '') ? 'active' : ''}`}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="header-actions">
+      <a href="#download" class="btn btn-primary nav-cta">
+        <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18" aria-hidden="true">
+          <path d="M3.609 1.814L13.792 12 3.61 22.186a2.072 2.072 0 0 1-.22-.387V2.202c.067-.142.142-.272.22-.388zm11.238 11.24L17.5 15.75l-12.87 7.43a2.04 2.04 0 0 1-1.02.26 2.044 2.044 0 0 1-.806-.164l12.043-10.222zm0-2.108L2.804.724A2.044 2.044 0 0 1 3.61.56c.36 0 .717.094 1.02.264l12.87 7.426-2.653 2.696zm1.488 1.488l3.415 1.97c.767.442.767 1.162 0 1.604l-3.415 1.97-1.74-1.772 1.74-1.772z"/>
+        </svg>
+        <span>Get the App</span>
+      </a>
+
+      <!-- Mobile Hamburger Toggle -->
+      <button 
+        id="mobile-menu-toggle" 
+        class="mobile-toggle-btn" 
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="mobile-nav-drawer"
+      >
+        <span class="bar bar-1"></span>
+        <span class="bar bar-2"></span>
+        <span class="bar bar-3"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer -->
+  <div id="mobile-nav-drawer" class="mobile-drawer" aria-hidden="true">
+    <div class="mobile-drawer-inner">
+      <ul class="mobile-nav-list">
+        {navLinks.map((link) => (
+          <li>
+            <a 
+              href={link.href} 
+              class={`mobile-nav-link ${activePath === link.href || activePath === link.href.replace(/\/$/, '') ? 'active' : ''}`}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+        <li class="mobile-compliance-section">
+          <span class="mobile-section-title">Legal & Security</span>
+          <div class="compliance-links">
+            <a href="/privacy/" class="mobile-sublink">Privacy Policy</a>
+            <a href="/data-safety/" class="mobile-sublink">Data Safety</a>
+            <a href="/terms/" class="mobile-sublink">Terms of Service</a>
+            <a href="/delete-account/" class="mobile-sublink danger-sublink">Account Deletion</a>
+          </div>
+        </li>
+      </ul>
+
+      <div class="mobile-drawer-cta">
+        <a href="#download" class="btn btn-primary" style="width: 100%;">
+          Download on Google Play
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+
+  .header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+
+  .brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.03em;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+
+  .brand-name {
+    color: var(--text-main);
+  }
+
+  .brand-dot {
+    color: var(--color-primary);
+  }
+
+  .brand-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 3px 7px;
+    background: var(--color-primary-container);
+    border: 1px solid #bfdbfe;
+    color: var(--color-primary-dark);
+    border-radius: 4px;
+    margin-left: 2px;
+  }
+
+  .brand-company-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    color: #475569;
+    letter-spacing: 0.02em;
+    margin-left: 8px;
+  }
+
+  .company-by {
+    color: #94a3b8;
+    font-weight: 500;
+    text-transform: lowercase;
+  }
+
+  .company-logo-emblem {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+  }
+
+  .company-name {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #0f172a;
+  }
+
+  @media (max-width: 640px) {
+    .brand-company-badge {
+      display: none;
+    }
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-list {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .nav-link {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    position: relative;
+    padding: 6px 0;
+  }
+
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--color-primary);
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-primary);
+    border-radius: 2px;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nav-cta {
+    padding: 10px 20px;
+    font-size: 14px;
+    min-height: 42px;
+  }
+
+  .play-icon {
+    flex-shrink: 0;
+  }
+
+  .mobile-toggle-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 44px;
+    height: 44px;
+    background: #f8fafc;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .mobile-toggle-btn .bar {
+    width: 20px;
+    height: 2px;
+    background-color: var(--text-main);
+    border-radius: 2px;
+    transition: all 0.25s ease;
+  }
+
+  .mobile-drawer {
+    display: none;
+    position: absolute;
+    top: 72px;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-subtle);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .mobile-drawer.open {
+    display: block;
+    animation: slideDown 0.2s ease-out;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .mobile-drawer-inner {
+    padding: 24px 20px 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .mobile-nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .mobile-nav-link {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-body);
+    display: block;
+    padding: 8px 0;
+  }
+
+  .mobile-nav-link.active,
+  .mobile-nav-link:hover {
+    color: var(--color-primary);
+  }
+
+  .mobile-compliance-section {
+    margin-top: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .mobile-section-title {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+
+  .compliance-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-sublink {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .danger-sublink {
+    color: var(--status-overdue);
+    font-weight: 600;
+  }
+
+  @media (max-width: 868px) {
+    .desktop-nav {
+      display: none;
+    }
+    .mobile-toggle-btn {
+      display: flex;
+    }
+    .nav-cta {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const toggleBtn = document.getElementById('mobile-menu-toggle');
+  const drawer = document.getElementById('mobile-nav-drawer');
+
+  if (toggleBtn && drawer) {
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+      toggleBtn.setAttribute('aria-expanded', String(!isExpanded));
+      drawer.classList.toggle('open');
+      drawer.setAttribute('aria-hidden', String(isExpanded));
+    });
+
+    drawer.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        toggleBtn.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+</script>

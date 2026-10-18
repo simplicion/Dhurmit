@@ -1,0 +1,642 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Features Deep-Dive | Dhurmit Committee Ledger" 
+  description="Explore the offline-first engineering, BigInt paisa precision, FIFO arrears flow, and dual organizer/member experiences that power Dhurmit."
+  activePath="/features/"
+>
+  <div class="features-page">
+    <!-- Header -->
+    <section class="page-hero">
+      <div class="container">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>Technical Architecture & Capabilities</span>
+        </div>
+        <h1 class="page-title">
+          Engineered For Accuracy. <br />
+          <span class="gradient-text">Designed For Trust.</span>
+        </h1>
+        <p class="page-subtitle">
+          Every feature in Dhurmit was designed from direct interviews with committee organizers, Dhukuti leaders, and ROSCA treasurers. Here is how our system protects your community from disputes.
+        </p>
+      </div>
+    </section>
+
+    <!-- Deep-Dive Section 1: Localization & Smart Calendar -->
+    <section id="localization" class="section-py contrast-section">
+      <div class="container">
+        <div class="grid-2 feature-split">
+          <div class="feature-split-text">
+            <span class="section-badge">Localization Service</span>
+            <h2 class="split-heading">Smart Country, Currency & Native Calendar</h2>
+            <p class="split-desc">
+              Community committees span the globe—from Nepal's vibrant Dhukuti circles to India's Chit Funds, Kenya's Chamas, and Latin America's Tandas. Dhurmit dynamically adapts to your locale.
+            </p>
+            <ul class="feature-points">
+              <li>
+                <strong>Zero Hardcoded Data:</strong> Dynamic geocoding service via OpenStreetMap detects regional standards, telephone formatting, and locale currencies.
+              </li>
+              <li>
+                <strong>Dual Calendar Synchronization:</strong> Seamlessly toggle and record cycles using native local calendars (like Bikram Sambat BS) and international Gregorian dates.
+              </li>
+              <li>
+                <strong>Local Currency Symbols:</strong> Formatted with appropriate thousand separators (e.g. South Asian Lakh/Crore systems vs Western millions).
+              </li>
+            </ul>
+          </div>
+          <div class="feature-split-visual">
+            <div class="glass-card feature-visual-card">
+              <div class="visual-header">
+                <span class="visual-tag">Location Customization</span>
+                <span class="visual-badge">Auto-Detected</span>
+              </div>
+              <div class="country-preview">
+                <div class="country-row">
+                  <span class="country-badge np-badge">NP</span>
+                  <div class="country-details">
+                    <span class="country-name">Nepal (Bikram Sambat BS 2083)</span>
+                    <span class="country-meta">Currency: रू (NPR) • Timezone: Asia/Kathmandu (UTC+5:45)</span>
+                  </div>
+                </div>
+                <div class="country-row">
+                  <span class="country-badge in-badge">IN</span>
+                  <div class="country-details">
+                    <span class="country-name">India (Vikram Samvat / Gregorian)</span>
+                    <span class="country-meta">Currency: ₹ (INR) • Format: Lakhs / Crores</span>
+                  </div>
+                </div>
+                <div class="country-row">
+                  <span class="country-badge global-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="2" y1="12" x2="22" y2="12"></line>
+                      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                  </span>
+                  <div class="country-details">
+                    <span class="country-name">Global Diaspora (Gregorian Calendar)</span>
+                    <span class="country-meta">Currency: USD ($), GBP (£), AED, EUR (€)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deep-Dive Section 2: Dual Role Experience -->
+    <section id="dual-role" class="section-py">
+      <div class="container">
+        <div class="grid-2 feature-split reverse-split">
+          <div class="feature-split-visual">
+            <div class="glass-card feature-visual-card">
+              <div class="role-tabs">
+                <div class="role-tab active">Member Bottom Sheet</div>
+                <div class="role-tab">Organizer Dashboard</div>
+              </div>
+              <div class="sheet-preview">
+                <div class="sheet-pill-bar"></div>
+                <div class="sheet-title">Join as a Committee Member</div>
+                <p class="sheet-sub">No complex setup. Enter your phone number and committee code to audit your savings ledger.</p>
+                <div class="input-preview">Phone: +977 9841-XXXXXX</div>
+                <div class="input-preview">Join Code: DHUKUTI-PKR-2026</div>
+                <div class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                  Verify Dues & Next Payout
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="feature-split-text">
+            <span class="section-badge">Dual Experience</span>
+            <h2 class="split-heading">Separate Roles for Organizers and Members</h2>
+            <p class="split-desc">
+              Organizers need comprehensive power to manage members, draw lottery turns, apply late penalties, and generate statements. Members only want to see their own status and the committee's health without touching settings.
+            </p>
+            <ul class="feature-points">
+              <li>
+                <strong>Organizer Control Center:</strong> Full oversight of total pool collections, overdue members, rotation schedule, and payment confirmations.
+              </li>
+              <li>
+                <strong>Lightweight Member Bottom Sheet:</strong> Members click "Join as Member" directly on the welcome screen to open an intuitive bottom sheet that verifies their history.
+              </li>
+              <li>
+                <strong>No Accidental Edits:</strong> Read-only cryptographic verification prevents members from unintentionally altering ledger entries.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deep-Dive Section 3: FIFO Arrears & Paisa Precision -->
+    <section id="fifo-arrears" class="section-py contrast-section">
+      <div class="container">
+        <div class="grid-2 feature-split">
+          <div class="feature-split-text">
+            <span class="section-badge">Financial Math</span>
+            <h2 class="split-heading">Paisa Precision & Automated FIFO Arrears</h2>
+            <p class="split-desc">
+              Most accounting apps fail at ROSCAs because they use floating-point numbers or lack automated arrears sequencing. Dhurmit implements banker-grade mathematical rules.
+            </p>
+            <ul class="feature-points">
+              <li>
+                <strong>BigInt Storage (Smallest Unit):</strong> All financial values are stored in whole integer paisa/cents. <code>रू 10,000</code> is recorded as <code>1000000</code> paisa, guaranteeing 0.00% precision drift.
+              </li>
+              <li>
+                <strong>First-In, First-Out (FIFO) Arrears:</strong> If a member owes for Month 2 and Month 3, a new deposit automatically satisfies Month 2 first, preventing dispute over interest or late fines.
+              </li>
+              <li>
+                <strong>Transparent Status Indicators:</strong> Each cycle for each member carries an unambiguous status badge: Paid on Time, Paid Late, Overdue, Partial, or Upcoming.
+              </li>
+            </ul>
+          </div>
+          <div class="feature-split-visual">
+            <div class="glass-card feature-visual-card">
+              <div class="visual-header">
+                <span class="visual-tag">FIFO Allocation Engine</span>
+                <span class="visual-badge" style="background: #dcfce7; color: #15803d; border-color: #86efac;">Simulated Deposit</span>
+              </div>
+              <div class="fifo-flow">
+                <div class="deposit-tag">Member deposits: रू 15,000</div>
+                <div class="flow-step">
+                  <div class="flow-arrow">↓</div>
+                  <div class="flow-box">
+                    <span>1. Cycle #3 Overdue: रू 10,000</span>
+                    <span class="status-pill status-paid">Cleared in Full</span>
+                  </div>
+                </div>
+                <div class="flow-step">
+                  <div class="flow-arrow">↓</div>
+                  <div class="flow-box">
+                    <span>2. Late Fine Penalty: रू 500</span>
+                    <span class="status-pill status-paid">Cleared</span>
+                  </div>
+                </div>
+                <div class="flow-step">
+                  <div class="flow-arrow">↓</div>
+                  <div class="flow-box">
+                    <span>3. Cycle #4 Current: रू 4,500</span>
+                    <span class="status-pill status-partial">Partial (रू 5,500 remaining)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deep-Dive Section 4: Offline-First SQLite -->
+    <section id="offline-sync" class="section-py">
+      <div class="container">
+        <div class="grid-2 feature-split reverse-split">
+          <div class="feature-split-visual">
+            <div class="glass-card feature-visual-card">
+              <div class="sync-graphic">
+                <div class="sync-node device-node">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                    <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                  </svg>
+                  <span>Local SQLite DB</span>
+                  <span class="sync-badge">0ms Local Latency</span>
+                </div>
+                <div class="sync-connector">
+                  <div class="connector-line"></div>
+                  <span class="connector-label">Delta Sync</span>
+                </div>
+                <div class="sync-node cloud-node">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28">
+                    <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                  </svg>
+                  <span>Encrypted Cloud Backup</span>
+                  <span class="sync-badge">When Connected</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="feature-split-text">
+            <span class="section-badge">Offline-First</span>
+            <h2 class="split-heading">Instant Performance, Even With Zero Reception</h2>
+            <p class="split-desc">
+              Organizers often collect cash on the go—inside noisy fruit markets, underground basements, or rural mountain tea stalls where cellular coverage drops. Dhurmit is built local-first.
+            </p>
+            <ul class="feature-points">
+              <li>
+                <strong>Instant SQLite Operations:</strong> Record payments, update notes, and generate receipts with zero network lag.
+              </li>
+              <li>
+                <strong>Conflict-Free Replication:</strong> When internet is restored, local updates merge cleanly using deterministic state timestamps.
+              </li>
+              <li>
+                <strong>Battery & Data Efficient:</strong> No endless polling or heavy background battery drain.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Deep-Dive Section 5: Transparency & WhatsApp -->
+    <section id="receipts" class="section-py contrast-section">
+      <div class="container">
+        <div class="section-header">
+          <span class="section-badge">Member Communication</span>
+          <h2 class="section-title">Automate Member Receipts & Group Accountability</h2>
+          <p class="section-desc">Keep your entire WhatsApp or Viber group informed with verifiable digital statements.</p>
+        </div>
+
+        <div class="grid-3">
+          <div class="glass-card">
+            <h3 class="card-title">1-Tap WhatsApp Receipts</h3>
+            <p class="feature-text">
+              Whenever you mark a payment, generate an exact receipt link or WhatsApp text block detailing the cycle number, amount credited, and balance remaining.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 class="card-title">Pre-Due Courtesy Reminders</h3>
+            <p class="feature-text">
+              Polite, automated alerts sent 3 days before rotation due dates. Avoid awkward phone calls and keep the group cash flow punctual.
+            </p>
+          </div>
+          <div class="glass-card">
+            <h3 class="card-title">Full PDF & Excel Exports</h3>
+            <p class="feature-text">
+              Generate print-ready ledger sheets with one tap. Ideal for annual committee general meetings, audits, or archival printing.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .features-page {
+    padding-bottom: 60px;
+  }
+
+  .page-hero {
+    padding-top: 60px;
+    padding-bottom: 60px;
+    text-align: center;
+  }
+
+  .page-title {
+    font-size: 44px;
+    font-weight: 800;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    line-height: 1.15;
+    color: var(--text-main);
+  }
+
+  .page-subtitle {
+    font-size: 16.5px;
+    color: var(--text-body);
+    max-width: 660px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  .feature-split {
+    align-items: center;
+    gap: 48px;
+  }
+
+  .reverse-split {
+    direction: ltr;
+  }
+
+  .split-heading {
+    font-size: 30px;
+    font-weight: 800;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    line-height: 1.25;
+    color: var(--text-main);
+  }
+
+  .split-desc {
+    font-size: 15.5px;
+    color: var(--text-body);
+    line-height: 1.65;
+    margin-bottom: 24px;
+  }
+
+  .feature-points {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .feature-points li {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: var(--text-body);
+    position: relative;
+    padding-left: 20px;
+  }
+
+  .feature-points li::before {
+    content: '•';
+    color: var(--color-primary);
+    position: absolute;
+    left: 0;
+    font-size: 20px;
+    line-height: 1;
+    top: 2px;
+  }
+
+  .feature-points strong {
+    color: var(--text-main);
+  }
+
+  .feature-visual-card {
+    padding: 30px;
+  }
+
+  .visual-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .visual-tag {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  .visual-badge {
+    font-size: 11px;
+    font-weight: 700;
+    background: #eff6ff;
+    color: #1e40af;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid #bfdbfe;
+  }
+
+  .country-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .country-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+  }
+
+  .country-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .np-badge {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+  }
+
+  .in-badge {
+    background: #ffedd5;
+    color: #c2410c;
+    border: 1px solid #fdba74;
+  }
+
+  .global-badge {
+    background: #e0f2fe;
+    color: #0284c7;
+    border: 1px solid #7dd3fc;
+  }
+
+  .country-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .country-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .country-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Role Tabs */
+  .role-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .role-tab {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+  }
+
+  .role-tab.active {
+    background: #dbeafe;
+    color: #1e40af;
+    border-color: #bfdbfe;
+  }
+
+  .sheet-preview {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  }
+
+  .sheet-pill-bar {
+    width: 36px;
+    height: 4px;
+    background: #cbd5e1;
+    border-radius: 2px;
+    margin: 0 auto 16px auto;
+  }
+
+  .sheet-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .sheet-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  .input-preview {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-body);
+    margin-bottom: 10px;
+    text-align: left;
+    font-family: var(--font-mono);
+  }
+
+  /* FIFO Flow */
+  .fifo-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .deposit-tag {
+    background: #dcfce7;
+    border: 1px solid #86efac;
+    color: #15803d;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    text-align: center;
+  }
+
+  .flow-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .flow-arrow {
+    color: var(--color-primary);
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  .flow-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    color: var(--text-main);
+    font-weight: 500;
+  }
+
+  /* Sync Graphic */
+  .sync-graphic {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 16px 0;
+  }
+
+  .sync-node {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 18px 12px;
+    border-radius: var(--radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .device-node svg { color: var(--color-primary); }
+  .cloud-node svg { color: var(--color-secondary); }
+
+  .sync-badge {
+    font-size: 10px;
+    background: #dbeafe;
+    color: #1e40af;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+
+  .sync-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .connector-line {
+    width: 40px;
+    height: 2px;
+    background: #cbd5e1;
+  }
+
+  .connector-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+
+  @media (max-width: 868px) {
+    .page-title {
+      font-size: 32px;
+    }
+    .feature-split {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .reverse-split {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+    .sync-graphic {
+      flex-direction: column;
+    }
+    .connector-line {
+      width: 2px;
+      height: 30px;
+    }
+  }
+</style>

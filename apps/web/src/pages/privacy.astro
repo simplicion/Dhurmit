@@ -1,0 +1,147 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Privacy Policy | Dhurmit Ledger" 
+  description="Official Google Play Store compliant Privacy Policy and Data Safety declaration for Dhurmit (Committee Ledger)."
+  activePath="/privacy/"
+>
+  <div class="compliance-page">
+    <div class="container">
+      <div class="compliance-header">
+        <span class="badge">Legal Transparency</span>
+        <h1 class="page-title">Privacy Policy & Data Safety</h1>
+        <p class="page-subtitle">
+          Effective Date: October 18, 2026 • Application ID: <code>app.dhurmit.com</code>
+        </p>
+      </div>
+
+      <div class="compliance-doc">
+        <div class="callout-box callout-info">
+          <strong>Summary for Users:</strong> Dhurmit is a software recordkeeping and ledger calculation utility. We do not hold, escrow, custody, or transmit money. We never sell your personal data or track you across third-party websites. All financial records are stored securely in your encrypted local database and synced only to enable team transparency.
+        </div>
+
+        <h2>1. Introduction</h2>
+        <p>
+          This Privacy Policy explains how <strong>Dhurmit</strong> ("we", "us", "our", or "the App") collects, uses, encrypts, and protects your information when you use our mobile application on Android and our associated web services.
+        </p>
+        <p>
+          By creating an account, onboarding as a committee organizer, or joining as a member, you agree to the practices outlined in this policy.
+        </p>
+
+        <h2 id="data-safety">2. Google Play Store Data Safety Declaration</h2>
+        <p>
+          In compliance with Google Play Store User Data and Developer Program policies, we declare the following parameters regarding user data:
+        </p>
+        <ul>
+          <li><strong>Data Encrypted in Transit:</strong> Yes. All communications between your mobile device and our synchronization backend are protected using industry-standard TLS 1.3 encryption (HTTPS).</li>
+          <li><strong>Data Encrypted at Rest:</strong> Yes. Local databases on Android are secured using Android Keystore and platform-level sandboxing (AES-256).</li>
+          <li><strong>User Deletion Mechanism:</strong> Yes. Users can delete their account and associated data either directly in the app (Settings > Account & Security) or online via our dedicated web portal at <a href="/delete-account/" style="color: #1e40af; text-decoration: underline;">/delete-account/</a>.</li>
+          <li><strong>Zero Data Brokerage:</strong> We never sell, rent, monetize, or trade your personal or committee data to advertising networks or data brokers.</li>
+        </ul>
+
+        <h2>3. Information We Collect</h2>
+        <h3>A. Information You Directly Provide</h3>
+        <ul>
+          <li><strong>Organizer Account Information:</strong> When you register as an organizer, we collect your name, email address, and a securely salted and hashed password.</li>
+          <li><strong>Member Roster Information:</strong> Organizers input member names and optional mobile phone numbers so the committee ledger can differentiate individual obligations and generate WhatsApp statements.</li>
+          <li><strong>Ledger & Contribution Records:</strong> Numerical contribution amounts, cycle dates, payment status (Paid on Time, Paid Late, Overdue, Partial, Upcoming), and notes. All monetary values are recorded purely as administrative records. <em>We never collect bank account login credentials, credit card numbers, debit card numbers, or CVVs.</em></li>
+        </ul>
+
+        <h3>B. Automatically Collected Information</h3>
+        <ul>
+          <li><strong>Device & Diagnostics:</strong> Android OS version, device model, app version (e.g. v1.0.0), and crash logs to troubleshoot synchronization issues and prevent crashes.</li>
+          <li><strong>Approximate Location (Country Selection):</strong> During onboarding, the app queries open geocoding services (such as OpenStreetMap Nominatim) to automatically set your local currency symbol, time zone, and regional calendar format. We do not track continuous GPS coordinates.</li>
+        </ul>
+
+        <h2>4. How We Use Your Information</h2>
+        <p>We process your data strictly to fulfill core app functionality:</p>
+        <ul>
+          <li>To calculate accurate committee rotation pots, member balances, and FIFO arrears allocations with zero floating-point math errors.</li>
+          <li>To synchronize committee changes between offline SQLite storage and our cloud ledger when you reconnect to the internet.</li>
+          <li>To generate pre-formatted, organizer-approved WhatsApp and SMS payment receipts and upcoming due notices.</li>
+          <li>To authenticate and safeguard your account against unauthorized access.</li>
+        </ul>
+
+        <h2>5. Operational Boundaries (Zero Custodial Liability)</h2>
+        <p>
+          Dhurmit is solely an administrative software utility. Dhurmit is not a bank, non-banking financial company (NBFC), escrow agent, or payment service provider. We do not handle fiat cash, custody savings pools, or conduct wire transfers. All financial settlement occurs peer-to-peer between committee participants outside of the software.
+        </p>
+
+        <h2>6. Third-Party Service Providers</h2>
+        <p>
+          We rely on trusted technical infrastructure partners who adhere to rigorous data protection standards:
+        </p>
+        <ul>
+          <li><strong>OpenStreetMap (Nominatim):</strong> Used for reverse geocoding during onboarding to detect regional currency and time zone formatting.</li>
+          <li><strong>Cloud Infrastructure:</strong> Secure cloud servers with SOC 2 / ISO 27001 certifications hosting encrypted PostgreSQL databases and API services.</li>
+          <li><strong>Google Play Services:</strong> Required for application distribution, secure updates, and optional crash telemetry.</li>
+        </ul>
+
+        <h2>7. Data Retention & Erasure</h2>
+        <p>
+          We retain personal data only for as long as your account remains active. When an account deletion is requested:
+        </p>
+        <ol>
+          <li>Your personal credentials, name, email, and device tokens are permanently purged.</li>
+          <li>In shared multi-party committees, historical transaction amounts are anonymized (e.g. marked as "Former Member") to prevent disrupting other participants' mathematical reconciliation.</li>
+          <li>Solo or private workspaces are erased completely.</li>
+        </ol>
+
+        <h2>8. Children's Privacy</h2>
+        <p>
+          Dhurmit is designed for adult financial coordinators and community organizers. We do not knowingly collect personal information from individuals under the age of 18 (or the applicable age of majority in your jurisdiction).
+        </p>
+
+        <h2>9. Changes to This Privacy Policy</h2>
+        <p>
+          We may update this policy periodically to reflect feature additions or regulatory revisions. Any material modifications will be announced through in-app notices or updated on this web page.
+        </p>
+
+        <h2>10. Contact Us & Grievance Redressal</h2>
+        <p>
+          If you have questions, feedback, or data privacy requests, please contact our Data Protection Officer:
+        </p>
+        <div class="callout-box callout-success">
+          <strong>Privacy & Grievance Officer:</strong><br />
+          Email: <a href="mailto:privacy@dhurmit.app" style="color: #15803d; text-decoration: underline;">privacy@dhurmit.app</a><br />
+          Support Desk: <a href="/contact/" style="color: #15803d; text-decoration: underline;">https://dhurmit.simplicion.com/contact/</a><br />
+          Mailing Address: Dhurmit Ledger Technologies, Pokhara / Kathmandu, Nepal & Global Operations.
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .compliance-page {
+    padding-top: 56px;
+    padding-bottom: 80px;
+  }
+
+  .compliance-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 30px auto;
+  }
+
+  .page-title {
+    font-size: 38px;
+    font-weight: 800;
+    margin-top: 16px;
+    margin-bottom: 12px;
+    color: var(--text-main);
+  }
+
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 30px;
+    }
+  }
+</style>

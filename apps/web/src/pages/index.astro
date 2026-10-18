@@ -1,0 +1,1233 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Dhurmit | The Offline-First Committee & Dhukuti Ledger" 
+  description="Manage community savings, ROSCA committees, and Dhukuti groups with zero arithmetic errors. Offline-first, paisa-precision, and 100% transparent."
+  activePath="/"
+>
+  <!-- HERO SECTION -->
+  <section class="hero-section">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="badge">
+          <span class="badge-dot"></span>
+          <span>Next-Gen Committee & Dhukuti Ledger</span>
+        </div>
+
+        <h1 class="hero-title">
+          Eliminate Ledger Disputes. <br />
+          <span class="gradient-text">Pure Mathematical Trust</span> <br />
+          For Your Committee.
+        </h1>
+
+        <p class="hero-description">
+          Dhurmit is the offline-first mobile ledger engineered for community organizers, ROSCAs, Chit Funds, and Dhukuti groups. Track every member's contribution with paisa precision, zero floating-point errors, and instant member transparency.
+        </p>
+
+        <div class="hero-actions">
+          <a href="#download" class="btn btn-primary hero-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+              <path d="M3.609 1.814L13.792 12 3.61 22.186a2.072 2.072 0 0 1-.22-.387V2.202c.067-.142.142-.272.22-.388zm11.238 11.24L17.5 15.75l-12.87 7.43a2.04 2.04 0 0 1-1.02.26 2.044 2.044 0 0 1-.806-.164l12.043-10.222zm0-2.108L2.804.724A2.044 2.044 0 0 1 3.61.56c.36 0 .717.094 1.02.264l12.87 7.426-2.653 2.696zm1.488 1.488l3.415 1.97c.767.442.767 1.162 0 1.604l-3.415 1.97-1.74-1.772 1.74-1.772z"/>
+            </svg>
+            <span>Download on Google Play</span>
+          </a>
+
+          <a href="/features/" class="btn btn-secondary">
+            <span>Explore All Features</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+              <path d="M5 12h14M12 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+
+        <!-- Trust Metrics -->
+        <div class="hero-metrics">
+          <div class="metric-item">
+            <span class="metric-val">100%</span>
+            <span class="metric-lbl">Offline SQLite Sync</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-val">BigInt</span>
+            <span class="metric-lbl">Zero Decimal Drift</span>
+          </div>
+          <div class="metric-divider"></div>
+          <div class="metric-item">
+            <span class="metric-val">0.00%</span>
+            <span class="metric-lbl">Custodial Risk (Pure Ledger)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hero Visual: Corporate Mockup Card -->
+      <div class="hero-visual">
+        <div class="mockup-frame">
+          <div class="mockup-header">
+            <div class="mockup-header-title">
+              <span class="live-dot"></span>
+              <span>Pokhara Traders Dhukuti 2026</span>
+            </div>
+            <span class="cycle-pill">Cycle #07 / 12</span>
+          </div>
+
+          <div class="pool-summary-box">
+            <div class="pool-meta">
+              <span class="pool-label">Monthly Pot Payout</span>
+              <span class="pool-amount">रू 1,200,000</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" style="width: 83%;"></div>
+            </div>
+            <div class="pool-status-row">
+              <span>10 of 12 Contributed</span>
+              <span class="highlight-green">रू 1,000,000 Collected</span>
+            </div>
+          </div>
+
+          <!-- Member Transaction Rows strictly per Section 5 of design MD -->
+          <div class="mockup-list">
+            <div class="mockup-item">
+              <div class="item-avatar avatar-blue">RA</div>
+              <div class="item-info">
+                <span class="item-name">Ramesh Adhikari</span>
+                <span class="item-sub">Paid via Cash • Oct 14</span>
+              </div>
+              <span class="status-pill status-paid">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Paid on Time
+              </span>
+            </div>
+
+            <div class="mockup-item">
+              <div class="item-avatar avatar-orange">ST</div>
+              <div class="item-info">
+                <span class="item-name">Sita Thapa</span>
+                <span class="item-sub">Paid via Bank Transfer • Oct 16</span>
+              </div>
+              <span class="status-pill status-late">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                Paid Late (+Fine)
+              </span>
+            </div>
+
+            <div class="mockup-item">
+              <div class="item-avatar avatar-purple">BS</div>
+              <div class="item-info">
+                <span class="item-name">Binod Shrestha</span>
+                <span class="item-sub">Partial: रू 50,000 / 100,000</span>
+              </div>
+              <span class="status-pill status-partial">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Partial
+              </span>
+            </div>
+
+            <div class="mockup-item">
+              <div class="item-avatar avatar-red">KG</div>
+              <div class="item-info">
+                <span class="item-name">Kiran Gurung</span>
+                <span class="item-sub">Due 3 days ago • WhatsApp Sent</span>
+              </div>
+              <span class="status-pill status-overdue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                Overdue
+              </span>
+            </div>
+          </div>
+
+          <div class="mockup-footer">
+            <span class="security-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+              Cryptographically Verified Ledger
+            </span>
+            <span class="audit-id">Hash: #a98f...d3e1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM VS SOLUTION -->
+  <section class="section-py contrast-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">The Paradigm Shift</span>
+        <h2 class="section-title">Replace Chaotic Paper Registers With Absolute Precision</h2>
+        <p class="section-desc">Traditional community committees collapse when hand-written notes get lost, late-fee math causes arguments, or members lose trust. Dhurmit restores harmony.</p>
+      </div>
+
+      <div class="grid-2 comparison-grid">
+        <!-- Old Way -->
+        <div class="glass-card problem-card">
+          <div class="card-tag tag-danger">Traditional Way (Notebooks & Excel)</div>
+          <h3 class="card-title text-red">Manual Headaches & Disputes</h3>
+          <ul class="comparison-list">
+            <li>
+              <span class="cross-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </span>
+              <span><strong>Lost or Torn Notebooks:</strong> Misplaced physical registers or water spills erase years of community records.</span>
+            </li>
+            <li>
+              <span class="cross-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </span>
+              <span><strong>Floating-Point Math Errors:</strong> Manual arithmetic slips lead to missing fractions and bitter accusations.</span>
+            </li>
+            <li>
+              <span class="cross-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </span>
+              <span><strong>Arrears Confusion:</strong> Debating whether a partial cash payment clears this month or last month's penalty.</span>
+            </li>
+            <li>
+              <span class="cross-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              </span>
+              <span><strong>Exhausting Phone Calls:</strong> Organizers spending entire weekends manually texting and chasing members.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Dhurmit Way -->
+        <div class="glass-card solution-card">
+          <div class="card-tag tag-success">The Dhurmit Standard</div>
+          <h3 class="card-title text-blue">Tamper-Evident Peace of Mind</h3>
+          <ul class="comparison-list">
+            <li>
+              <span class="check-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span><strong>Offline-First SQLite:</strong> Records stay 100% accessible on your phone, even without cellular coverage.</span>
+            </li>
+            <li>
+              <span class="check-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span><strong>BigInt Paisa Precision:</strong> Stored as exact integer smallest units (paisa/cents). Absolutely zero rounding drift.</span>
+            </li>
+            <li>
+              <span class="check-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span><strong>Strict FIFO Settlement:</strong> Payments automatically clear oldest overdue balances and penalties first.</span>
+            </li>
+            <li>
+              <span class="check-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              </span>
+              <span><strong>1-Tap WhatsApp Receipts:</strong> Instant transparent breakdown cards sent straight to members' phones.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE COMMITTEE CALCULATOR -->
+  <section id="calculator" class="section-py">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Interactive Simulation</span>
+        <h2 class="section-title">Model Your Committee In Real-Time</h2>
+        <p class="section-desc">Configure your group size and contribution to preview monthly pot sizes, rotation cycles, and total capital mobilized.</p>
+      </div>
+
+      <div class="glass-card calculator-card">
+        <div class="calculator-grid">
+          <!-- Controls -->
+          <div class="calc-controls">
+            <div class="form-group">
+              <div class="slider-header">
+                <label for="member-slider">Number of Members</label>
+                <span id="member-val" class="slider-display">12 Members</span>
+              </div>
+              <input type="range" id="member-slider" min="3" max="30" value="12" class="range-slider" />
+              <div class="slider-ticks">
+                <span>3</span>
+                <span>10</span>
+                <span>20</span>
+                <span>30</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="slider-header">
+                <label for="amount-slider">Monthly Contribution per Member</label>
+                <span id="amount-val" class="slider-display">रू 10,000</span>
+              </div>
+              <input type="range" id="amount-slider" min="1000" max="100000" step="1000" value="10000" class="range-slider" />
+              <div class="slider-ticks">
+                <span>रू 1k</span>
+                <span>रू 25k</span>
+                <span>रू 50k</span>
+                <span>रू 100k</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cycle-type">Cycle Frequency</label>
+              <select id="cycle-type" class="custom-select">
+                <option value="monthly">Monthly Rotation (Standard Dhukuti / Chit Fund)</option>
+                <option value="biweekly">Bi-Weekly Rotation (Quick Fund)</option>
+                <option value="weekly">Weekly Rotation (Market Guild)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Live Result Display -->
+          <div class="calc-results">
+            <h4 class="results-heading">Calculated Ledger Output</h4>
+            
+            <div class="result-highlight-box">
+              <span class="result-label">Single Round Pot Payout</span>
+              <span id="payout-total" class="result-amount">रू 120,000</span>
+              <span class="result-sub">Distributed to each winning member in rotation</span>
+            </div>
+
+            <div class="stats-mini-grid">
+              <div class="mini-stat">
+                <span class="mini-label">Total Committee Duration</span>
+                <span id="duration-val" class="mini-val">12 Months</span>
+              </div>
+              <div class="mini-stat">
+                <span class="mini-label">Total Capital Mobilized</span>
+                <span id="capital-total" class="mini-val">रू 1,440,000</span>
+              </div>
+              <div class="mini-stat">
+                <span class="mini-label">Net Lifetime Obligation</span>
+                <span id="member-total" class="mini-val">रू 120,000</span>
+              </div>
+              <div class="mini-stat">
+                <span class="mini-label">Accounting Discrepancy</span>
+                <span class="mini-val text-green">0.00% Guaranteed</span>
+              </div>
+            </div>
+
+            <div class="calc-cta-row">
+              <a href="#download" class="btn btn-primary" style="width: 100%;">
+                Start This Committee on Dhurmit
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 CORE PILLARS GRID -->
+  <section class="section-py contrast-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-badge">Engineered For Communities</span>
+        <h2 class="section-title">Built Specially For The Reality of ROSCAs</h2>
+        <p class="section-desc">From village bazaar Dhukuti circles to diaspora apartment committees, Dhurmit handles every edge case seamlessly.</p>
+      </div>
+
+      <div class="grid-3">
+        <!-- Feature 1 -->
+        <div class="glass-card feature-box">
+          <div class="feature-icon-wrapper icon-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </div>
+          <h3 class="feature-title">Smart Calendar & Geo-Location</h3>
+          <p class="feature-text">Select your country during onboarding to dynamically adapt currencies, time zones, and dual Gregorian / Bikram Sambat calendar dates.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="glass-card feature-box">
+          <div class="feature-icon-wrapper icon-sky">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <h3 class="feature-title">Dual Organizer & Member Portal</h3>
+          <p class="feature-text">Organizers manage the full ledger with payment logs, while members join via a quick bottom-sheet to audit their own dues and payout turn.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="glass-card feature-box">
+          <div class="feature-icon-wrapper icon-green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Automated FIFO Arrears Flow</h3>
+          <p class="feature-text">When a member pays partially, Dhurmit automatically allocates funds to their oldest outstanding month and penalties before touching the current cycle.</p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="glass-card feature-box">
+          <div class="feature-icon-wrapper icon-orange">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Instant WhatsApp Statements</h3>
+          <p class="feature-text">Generate professional, pre-formatted WhatsApp and SMS receipt summaries with one tap. Keep every participant informed and accountable.</p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="glass-card feature-box">
+          <div class="feature-icon-wrapper icon-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">100% Offline-First SQLite</h3>
+          <p class="feature-text">Record payments deep inside vegetable wholesale markets or remote valleys without cellular reception. Auto-syncs seamlessly once back online.</p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="glass-card feature-box">
+          <div class="feature-icon-wrapper icon-indigo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h3 class="feature-title">Zero Custodial Liability</h3>
+          <p class="feature-text">Dhurmit does not touch a single rupee or dollar. You maintain physical or bank custody; Dhurmit provides unassailable mathematical records.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GOOGLE PLAY DOWNLOAD SECTION -->
+  <section id="download" class="section-py download-banner-section">
+    <div class="container">
+      <div class="download-banner-card">
+        <div class="download-banner-content">
+          <span class="badge download-badge">
+            <span class="badge-dot"></span>
+            <span>Android Release v1.0.0</span>
+          </span>
+
+          <h2 class="download-title">Ready To Upgrade Your Committee Ledger?</h2>
+          <p class="download-text">
+            Join hundreds of committee organizers and members who run on mathematical transparency. Available now on Android devices via Google Play.
+          </p>
+
+          <div class="download-btn-group">
+            <a href="https://play.google.com/store/apps/details?id=app.dhurmit.com" target="_blank" rel="noopener noreferrer" class="playstore-big-btn">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
+                <path d="M3.609 1.814L13.792 12 3.61 22.186a2.072 2.072 0 0 1-.22-.387V2.202c.067-.142.142-.272.22-.388zm11.238 11.24L17.5 15.75l-12.87 7.43a2.04 2.04 0 0 1-1.02.26 2.044 2.044 0 0 1-.806-.164l12.043-10.222zm0-2.108L2.804.724A2.044 2.044 0 0 1 3.61.56c.36 0 .717.094 1.02.264l12.87 7.426-2.653 2.696zm1.488 1.488l3.415 1.97c.767.442.767 1.162 0 1.604l-3.415 1.97-1.74-1.772 1.74-1.772z"/>
+              </svg>
+              <div class="play-btn-labels">
+                <span class="play-sub">GET IT ON</span>
+                <span class="play-main">Google Play</span>
+              </div>
+            </a>
+
+            <div class="trust-notice">
+              <span class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Verified Google Play Developer
+              </span>
+              <span class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Regular Security Audits
+              </span>
+              <span class="trust-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                Pure Local Privacy
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="download-banner-visual">
+          <img src="/logo.png" alt="Dhurmit Official Product Logo" class="banner-app-icon" width="160" height="160" />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Hero Styles */
+  .hero-section {
+    padding-top: 56px;
+    padding-bottom: 72px;
+    position: relative;
+  }
+
+  .hero-container {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 48px;
+    align-items: center;
+  }
+
+  .hero-title {
+    font-size: 46px;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-top: 18px;
+    margin-bottom: 20px;
+    color: var(--text-main);
+  }
+
+  .hero-description {
+    font-size: 16.5px;
+    line-height: 1.65;
+    color: var(--text-body);
+    margin-bottom: 32px;
+    max-width: 580px;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+  }
+
+  .hero-btn {
+    padding: 14px 28px;
+    font-size: 15px;
+  }
+
+  .hero-metrics {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .metric-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .metric-val {
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+
+  .metric-lbl {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .metric-divider {
+    width: 1px;
+    height: 32px;
+    background: var(--border-subtle);
+  }
+
+  /* Corporate Mockup Frame */
+  .mockup-frame {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.05);
+  }
+
+  .mockup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+  }
+
+  .mockup-header-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: #15803d;
+    border-radius: 50%;
+  }
+
+  .cycle-pill {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 8px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e40af;
+    border-radius: 6px;
+  }
+
+  .pool-summary-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+
+  .pool-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .pool-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .pool-amount {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--color-primary);
+  }
+
+  .progress-bar-container {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1e40af, #0284c7);
+    border-radius: 4px;
+  }
+
+  .pool-status-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .highlight-green {
+    color: var(--status-paid-on-time);
+    font-weight: 700;
+  }
+
+  .mockup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .mockup-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  }
+
+  .item-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .avatar-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  .avatar-orange { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+  .avatar-purple { background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe; }
+  .avatar-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+  .item-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin-right: 10px;
+  }
+
+  .item-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .item-sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .mockup-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 11.5px;
+    color: var(--text-muted);
+  }
+
+  .security-badge {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--text-body);
+    font-weight: 500;
+  }
+
+  .security-badge svg {
+    color: var(--color-primary);
+  }
+
+  .audit-id {
+    font-family: var(--font-mono);
+  }
+
+  /* Section Styles */
+  .contrast-section {
+    background: #f1f5f9;
+    border-top: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .section-header {
+    text-align: center;
+    max-width: 680px;
+    margin: 0 auto 52px auto;
+  }
+
+  .section-badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-primary);
+    background: var(--color-primary-container);
+    border: 1px solid #bfdbfe;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--text-main);
+  }
+
+  .section-desc {
+    font-size: 15.5px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* Comparison Grid */
+  .comparison-grid {
+    align-items: stretch;
+  }
+
+  .problem-card {
+    border-color: #fecdd3;
+    background: #fff5f5;
+  }
+
+  .solution-card {
+    border-color: #bfdbfe;
+    background: #f8fbff;
+  }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+  }
+
+  .tag-danger {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+  }
+
+  .tag-success {
+    background: #dbeafe;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
+  .text-red { color: #b91c1c; }
+  .text-blue { color: #1e40af; }
+  .text-green { color: #15803d; }
+
+  .comparison-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .comparison-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text-body);
+  }
+
+  .cross-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #fee2e2;
+    color: #dc2626;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .check-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #dcfce7;
+    color: #16a34a;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* Calculator Styles */
+  .calculator-card {
+    padding: 36px;
+    background: #ffffff;
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-md);
+  }
+
+  .calculator-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .form-group {
+    margin-bottom: 24px;
+  }
+
+  .slider-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .slider-header label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+  }
+
+  .slider-display {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .range-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #e2e8f0;
+    outline: none;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+  }
+
+  .slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  .custom-select {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border-glass);
+    color: var(--text-main);
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: var(--font-body);
+    outline: none;
+    margin-top: 6px;
+  }
+
+  .calc-results {
+    background: #f8fafc;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+  }
+
+  .results-heading {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .result-highlight-box {
+    background: #dbeafe;
+    border: 1px solid #bfdbfe;
+    border-radius: var(--radius-md);
+    padding: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .result-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #1e3a8a;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .result-amount {
+    display: block;
+    font-family: var(--font-heading);
+    font-size: 34px;
+    font-weight: 800;
+    color: #1e3a8a;
+    line-height: 1.1;
+  }
+
+  .result-sub {
+    font-size: 12px;
+    color: #3b82f6;
+  }
+
+  .stats-mini-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .mini-stat {
+    background: #ffffff;
+    border: 1px solid var(--border-subtle);
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+  }
+
+  .mini-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .mini-val {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  /* Feature Pillars */
+  .feature-box {
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+  }
+
+  .feature-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+
+  .icon-blue { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+  .icon-sky { background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; }
+  .icon-green { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .icon-orange { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+  .icon-purple { background: #ede9fe; color: #7c3aed; border: 1px solid #ddd6fe; }
+  .icon-indigo { background: #e0e7ff; color: #4338ca; border: 1px solid #c7d2fe; }
+
+  .feature-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+  }
+
+  .feature-text {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+
+  /* Download Banner */
+  .download-banner-card {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+    border-radius: var(--radius-xl);
+    padding: 48px;
+    display: grid;
+    grid-template-columns: 1.4fr 0.6fr;
+    gap: 40px;
+    align-items: center;
+    color: #ffffff;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .download-badge {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+  }
+
+  .download-badge .badge-dot {
+    background: #60a5fa;
+  }
+
+  .download-title {
+    font-size: 32px;
+    color: #ffffff;
+    margin-top: 14px;
+    margin-bottom: 12px;
+  }
+
+  .download-text {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: #e2e8f0;
+    margin-bottom: 28px;
+  }
+
+  .download-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .playstore-big-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    background: #0f172a;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: var(--radius-md);
+    width: fit-content;
+    transition: all 0.2s ease;
+  }
+
+  .playstore-big-btn:hover {
+    background: #000000;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .play-btn-labels {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .play-sub {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .play-main {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 800;
+    color: #ffffff;
+  }
+
+  .trust-notice {
+    display: flex;
+    gap: 16px;
+    font-size: 12px;
+    color: #cbd5e1;
+    flex-wrap: wrap;
+  }
+
+  .trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #e2e8f0;
+    font-weight: 500;
+  }
+
+  .trust-badge svg {
+    color: #38bdf8;
+    flex-shrink: 0;
+  }
+
+  .download-banner-visual {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .banner-app-icon {
+    border-radius: 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 3px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Responsive Rules */
+  @media (max-width: 968px) {
+    .hero-container {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    .calculator-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    .download-banner-card {
+      grid-template-columns: 1fr;
+      padding: 32px 24px;
+    }
+    .download-banner-visual {
+      display: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .hero-title {
+      font-size: 32px;
+    }
+    .hero-metrics {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .metric-divider {
+      display: none;
+    }
+    .section-title {
+      font-size: 26px;
+    }
+    .stats-mini-grid {
+      grid-template-columns: 1fr;
+    }
+    .playstore-big-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<script>
+  // Interactive Calculator Logic
+  const memberSlider = document.getElementById('member-slider') as HTMLInputElement | null;
+  const amountSlider = document.getElementById('amount-slider') as HTMLInputElement | null;
+  const cycleSelect = document.getElementById('cycle-type') as HTMLSelectElement | null;
+
+  const memberVal = document.getElementById('member-val');
+  const amountVal = document.getElementById('amount-val');
+  const payoutTotal = document.getElementById('payout-total');
+  const durationVal = document.getElementById('duration-val');
+  const capitalTotal = document.getElementById('capital-total');
+  const memberTotal = document.getElementById('member-total');
+
+  function updateCalculator() {
+    if (!memberSlider || !amountSlider || !cycleSelect) return;
+
+    const members = parseInt(memberSlider.value, 10);
+    const amount = parseInt(amountSlider.value, 10);
+    const frequency = cycleSelect.value;
+
+    if (memberVal) memberVal.textContent = `${members} Members`;
+    if (amountVal) amountVal.textContent = `रू ${amount.toLocaleString()}`;
+
+    // Single Round Pot Payout
+    const pot = members * amount;
+    if (payoutTotal) payoutTotal.textContent = `रू ${pot.toLocaleString()}`;
+
+    // Duration text
+    let unit = 'Months';
+    if (frequency === 'biweekly') unit = 'Bi-Weeks';
+    if (frequency === 'weekly') unit = 'Weeks';
+    if (durationVal) durationVal.textContent = `${members} ${unit}`;
+
+    // Total Capital Mobilized
+    const totalCapital = pot * members;
+    if (capitalTotal) capitalTotal.textContent = `रू ${totalCapital.toLocaleString()}`;
+
+    // Member Total Contribution
+    if (memberTotal) memberTotal.textContent = `रू ${pot.toLocaleString()}`;
+  }
+
+  if (memberSlider && amountSlider && cycleSelect) {
+    memberSlider.addEventListener('input', updateCalculator);
+    amountSlider.addEventListener('input', updateCalculator);
+    cycleSelect.addEventListener('change', updateCalculator);
+    updateCalculator();
+  }
+</script>

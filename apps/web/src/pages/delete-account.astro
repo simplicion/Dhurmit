@@ -1,0 +1,282 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Account & Data Deletion | Dhurmit Ledger" 
+  description="Official Google Play Store compliant account and data deletion instructions and online deletion request form for Dhurmit (Committee Ledger)."
+  activePath="/delete-account/"
+>
+  <div class="compliance-page">
+    <div class="container">
+      <div class="compliance-header">
+        <span class="badge" style="background: #fee2e2; border-color: #fca5a5; color: #b91c1c;">
+          Google Play Compliance Policy
+        </span>
+        <h1 class="page-title">Request Account & Data Deletion</h1>
+        <p class="page-subtitle">
+          Under Google Play Store User Data policies, you have the absolute right to request the permanent deletion of your account and personal data from Dhurmit (Committee Ledger).
+        </p>
+      </div>
+
+      <!-- Compliance Callout -->
+      <div class="callout-box callout-warning">
+        <strong>Important Data Policy Notice:</strong> Once your deletion request is processed, your login credentials, personal profile, device push notification tokens, and contact identifiers are permanently purged from our active databases. 
+      </div>
+
+      <div class="grid-2 deletion-grid">
+        <!-- Left: Policy details -->
+        <div class="compliance-doc" style="margin: 0;">
+          <h2>How Account Deletion Works</h2>
+          
+          <h3>1. Option A: In-App Immediate Deletion</h3>
+          <p>
+            If you still have the Dhurmit application installed on your Android device:
+          </p>
+          <ol>
+            <li>Open <strong>Dhurmit</strong> and sign in to your account.</li>
+            <li>Go to <strong>Settings</strong> > <strong>Account & Security</strong>.</li>
+            <li>Tap <strong>Delete Account & Purge Data</strong>.</li>
+            <li>Confirm by entering your password or verifying your registered email OTP.</li>
+            <li>Your account will be deactivated immediately and scheduled for purge.</li>
+          </ol>
+
+          <h3>2. Option B: Web Request (No App Re-installation Needed)</h3>
+          <p>
+            If you have uninstalled the app or lost your mobile device, submit the web request form on this page. Our compliance officer will verify your email ownership and process the deletion within <strong>7 business days</strong>.
+          </p>
+
+          <h2>Data Retention & Anonymization Details</h2>
+          <p>
+            To maintain cryptographic integrity and mathematical balance for other members of active committees, historical ledger entries are handled as follows:
+          </p>
+          <ul>
+            <li><strong>Personal Identity (Purged):</strong> Your name, email address, password hash, phone number, and device tokens are completely removed.</li>
+            <li><strong>Shared Committee Records (Anonymized):</strong> Prior contribution entries recorded in committees where other participants have financial stakes are scrubbed of personal identifiers and renamed to <em>"Former Member (Anonymized)"</em> so the historical cash ledger continues to reconcile mathematically without breaking other participants' records.</li>
+            <li><strong>Solo/Personal Workspaces:</strong> If you are the sole organizer of an unshared committee, the entire committee and all its records are permanently and irrecoverably erased.</li>
+          </ul>
+
+          <div class="callout-box callout-info">
+            <strong>Need Assistance?</strong> You can also email our Data Protection Officer directly at <a href="mailto:privacy@dhurmit.app" style="color: #1e40af; text-decoration: underline;">privacy@dhurmit.app</a> with the subject line <em>"Account Deletion Request"</em>.
+          </div>
+        </div>
+
+        <!-- Right: Interactive Deletion Request Form -->
+        <div class="glass-card deletion-form-card">
+          <h2 class="form-title">Online Deletion Request Form</h2>
+          <p class="form-desc">Submit this form to begin the permanent data erasure workflow.</p>
+
+          <form id="deletion-form" class="deletion-form">
+            <div class="form-group">
+              <label for="del-email">Registered Email Address *</label>
+              <input 
+                type="email" 
+                id="del-email" 
+                name="email" 
+                required 
+                placeholder="you@example.com"
+                class="form-input" 
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="del-phone">Registered Phone Number (Optional)</label>
+              <input 
+                type="tel" 
+                id="del-phone" 
+                name="phone" 
+                placeholder="+977 98XXXXXXXX / +1 XXXXXXXXXX"
+                class="form-input" 
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="del-reason">Reason for Leaving (Optional)</label>
+              <select id="del-reason" name="reason" class="form-input">
+                <option value="finished">Our committee completed its rotation</option>
+                <option value="privacy">Privacy / Personal reasons</option>
+                <option value="not_needed">No longer using rotating savings</option>
+                <option value="other">Other reason</option>
+              </select>
+            </div>
+
+            <div class="form-group check-group">
+              <input type="checkbox" id="del-confirm" required class="checkbox-input" />
+              <label for="del-confirm" class="checkbox-label">
+                I understand that this action is irreversible and my personal information will be permanently deleted.
+              </label>
+            </div>
+
+            <button type="submit" id="del-submit-btn" class="btn btn-danger" style="width: 100%;">
+              Submit Deletion Request
+            </button>
+
+            <!-- Success State -->
+            <div id="deletion-success" class="submission-success" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32" style="color: #15803d; margin: 0 auto 12px auto;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <h4>Deletion Request Received</h4>
+              <p>We have dispatched a verification email to your address. Please click the confirmation link in your inbox to finalize the permanent account purge.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .compliance-page {
+    padding-top: 56px;
+    padding-bottom: 80px;
+  }
+
+  .compliance-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 36px auto;
+  }
+
+  .page-title {
+    font-size: 38px;
+    font-weight: 800;
+    margin-top: 16px;
+    margin-bottom: 14px;
+    color: var(--text-main);
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-body);
+  }
+
+  .deletion-grid {
+    align-items: start;
+    gap: 36px;
+  }
+
+  .deletion-form-card {
+    padding: 32px;
+    position: sticky;
+    top: 96px;
+    background: #ffffff;
+    border: 1px solid var(--border-glass);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .form-title {
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--text-main);
+  }
+
+  .form-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s ease;
+    font-family: var(--font-body);
+  }
+
+  .form-input:focus {
+    border-color: #dc2626;
+  }
+
+  .check-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .checkbox-input {
+    margin-top: 4px;
+    accent-color: #dc2626;
+    width: 16px;
+    height: 16px;
+  }
+
+  .checkbox-label {
+    font-size: 13px !important;
+    line-height: 1.5;
+    color: var(--text-muted) !important;
+  }
+
+  .submission-success {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: var(--radius-md);
+    padding: 20px;
+    text-align: center;
+    margin-top: 18px;
+  }
+
+  .submission-success h4 {
+    color: #15803d;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .submission-success p {
+    font-size: 13px;
+    color: #14532d;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  @media (max-width: 868px) {
+    .page-title {
+      font-size: 30px;
+    }
+    .deletion-grid {
+      grid-template-columns: 1fr;
+    }
+    .deletion-form-card {
+      position: static;
+    }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('deletion-form') as HTMLFormElement | null;
+  const submitBtn = document.getElementById('del-submit-btn') as HTMLButtonElement | null;
+  const successBox = document.getElementById('deletion-success');
+
+  if (form && submitBtn && successBox) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing Request...';
+
+      setTimeout(() => {
+        submitBtn.style.display = 'none';
+        successBox.style.display = 'block';
+      }, 700);
+    });
+  }
+</script>

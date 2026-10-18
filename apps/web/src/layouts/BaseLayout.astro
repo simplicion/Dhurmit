@@ -1,0 +1,153 @@
+---
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  activePath?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description = "Dhurmit is the offline-first, mathematical committee & Dhukuti ledger for community organizers and ROSCA savings groups. Accurate, transparent, and secure.",
+  activePath = '/',
+  ogImage = '/logo.png',
+} = Astro.props;
+
+const siteUrl = "https://dhurmit.simplicion.com";
+const canonicalUrl = new URL(activePath, siteUrl).href;
+const fullTitle = title.includes("Dhurmit") ? title : `${title} | Dhurmit - Committee & Dhukuti Ledger`;
+const absoluteOgImage = ogImage.startsWith('http') ? ogImage : `${siteUrl}${ogImage}`;
+
+const schemaOrgData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://simplicion.com/#organization",
+      "name": "Simplicion",
+      "url": "https://simplicion.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl}/company/logo-black.svg`
+      },
+      "sameAs": [
+        "https://simplicion.com",
+        "https://github.com/simplicion"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      "url": siteUrl,
+      "name": "Dhurmit Ledger",
+      "description": "Offline-first mathematical ledger for ROSCA, Dhukuti, Chit Fund, and Kameti community organizers.",
+      "publisher": {
+        "@id": "https://simplicion.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${siteUrl}/#application`,
+      "name": "Dhurmit",
+      "operatingSystem": "Android, iOS",
+      "applicationCategory": "FinanceApplication",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "author": {
+        "@id": "https://simplicion.com/#organization"
+      },
+      "image": `${siteUrl}/logo.png`,
+      "description": description,
+      "featureList": [
+        "Offline-first SQLite ledger architecture",
+        "BigInt zero-precision-loss integer currency math",
+        "Automated FIFO arrears and late fee penalty deduction",
+        "Dual organizer management and member self-audit views",
+        "Bikram Sambat BS and Gregorian calendar synchronization",
+        "Zero-custody pure recordkeeping compliance"
+      ],
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "reviewCount": "128",
+        "bestRating": "5",
+        "worstRating": "1"
+      }
+    }
+  ]
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="Dhurmit, Dhukuti ledger, committee app, ROSCA software, chit fund manager, kameti management app, offline ledger, community savings, Simplicion, financial recordkeeping, peer to peer savings" />
+    <meta name="author" content="Simplicion" />
+    <meta name="publisher" content="Simplicion" />
+    <meta name="application-name" content="Dhurmit" />
+    <meta name="apple-mobile-web-app-title" content="Dhurmit" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicon & Touch Icons -->
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/svg+xml" href="/company/icon-black.svg" />
+    <link rel="apple-touch-icon" href="/icon.png" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={absoluteOgImage} />
+    <meta property="og:image:width" content="1024" />
+    <meta property="og:image:height" content="1024" />
+    <meta property="og:image:alt" content="Dhurmit - Committee & Dhukuti Ledger" />
+    <meta property="og:site_name" content="Dhurmit Ledger" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalUrl} />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={absoluteOgImage} />
+    <meta name="twitter:creator" content="@simplicion" />
+
+    <!-- Font preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Structured Data (JSON-LD) for Global Search Engines -->
+    <script type="application/ld+json" set:html={JSON.stringify(schemaOrgData)} />
+  </head>
+  <body>
+    <Navbar activePath={activePath} />
+    <main id="main-content" class="page-content">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style>
+  .page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+</style>

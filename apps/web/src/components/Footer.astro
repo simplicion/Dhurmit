@@ -1,0 +1,390 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <!-- Disclaimer Banner -->
+  <div class="disclaimer-banner">
+    <div class="container">
+      <div class="disclaimer-content">
+        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <p class="disclaimer-text">
+          <strong>Legal Boundary Notice:</strong> Dhurmit is strictly an offline-first recordkeeping ledger and calculation utility. Dhurmit does <strong>NOT</strong> accept, hold, custody, or transmit money, nor does it provide financial services, banking, or credit. All pool contributions and payouts occur directly peer-to-peer among trusted community members.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="container footer-main">
+    <div class="footer-grid">
+      <!-- Col 1: Brand & Bio -->
+      <div class="footer-brand-col">
+        <a href="/" class="footer-brand">
+          <img src="/logo.png" alt="Dhurmit Official Product Logo" class="brand-logo" width="34" height="34" />
+          <span class="brand-name">Dhurmit<span class="brand-dot">.</span></span>
+        </a>
+
+        <div class="company-attribution">
+          <span class="attribution-label">A PRODUCT OF</span>
+          <a href="https://simplicion.com" target="_blank" rel="noopener noreferrer" class="company-logo-link" title="Simplicion - Engineering Digital Platforms">
+            <img src="/company/logo-black.svg" alt="Simplicion Official Company Logo" class="company-logo-img" width="130" height="18" />
+          </a>
+        </div>
+
+        <p class="brand-desc">
+          The offline-first mathematical ledger engineered for Rotating Savings and Credit Associations (ROSCAs), Dhukuti, Chit Funds, Kameti, and community committee organizers.
+        </p>
+        
+        <div class="badge-tech">
+          <span class="tech-badge">Paisa Precision (BigInt)</span>
+          <span class="tech-badge">Offline-First SQLite</span>
+          <span class="tech-badge">Zero Custodial Risk</span>
+        </div>
+      </div>
+
+      <!-- Col 2: Product -->
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Product</h4>
+        <ul class="footer-links">
+          <li><a href="/features/">All Features</a></li>
+          <li><a href="/features/#dual-role">Organizer & Member Views</a></li>
+          <li><a href="/features/#offline-sync">Offline-First Architecture</a></li>
+          <li><a href="/features/#fifo-arrears">FIFO Arrears Settlement</a></li>
+          <li><a href="/how-it-works/">How It Works</a></li>
+          <li><a href="/#calculator">Pool Calculator</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Compliance & Google Play Store -->
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Google Play Compliance</h4>
+        <ul class="footer-links">
+          <li><a href="/privacy/">Privacy Policy</a></li>
+          <li><a href="/data-safety/">Data Safety Declaration</a></li>
+          <li><a href="/terms/">Terms & Conditions</a></li>
+          <li><a href="/delete-account/" class="deletion-link">Delete Account & Data</a></li>
+          <li><a href="/contact/">Support & Grievance</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 4: App Download & Community -->
+      <div class="footer-links-col">
+        <h4 class="footer-heading">Get Started</h4>
+        <p class="footer-subtext">Manage your committee with zero accounting errors and complete transparency.</p>
+        
+        <a href="#download" class="playstore-btn">
+          <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+            <path d="M3.609 1.814L13.792 12 3.61 22.186a2.072 2.072 0 0 1-.22-.387V2.202c.067-.142.142-.272.22-.388zm11.238 11.24L17.5 15.75l-12.87 7.43a2.04 2.04 0 0 1-1.02.26 2.044 2.044 0 0 1-.806-.164l12.043-10.222zm0-2.108L2.804.724A2.044 2.044 0 0 1 3.61.56c.36 0 .717.094 1.02.264l12.87 7.426-2.653 2.696zm1.488 1.488l3.415 1.97c.767.442.767 1.162 0 1.604l-3.415 1.97-1.74-1.772 1.74-1.772z"/>
+          </svg>
+          <div class="play-text">
+            <span class="small-text">GET IT ON</span>
+            <span class="large-text">Google Play</span>
+          </div>
+        </a>
+
+        <div class="security-seal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span>Encrypted Local Storage (AES-256)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="footer-bottom">
+      <div class="copyright">
+        © {currentYear} Dhurmit Ledger. Official product engineered by <a href="https://simplicion.com" target="_blank" rel="noopener noreferrer" class="company-inline-link">Simplicion</a>. All rights reserved.
+      </div>
+      <div class="bottom-badges">
+        <span>v1.0.0 Production</span>
+        <span>•</span>
+        <span>Google Play Verified Developer</span>
+        <span>•</span>
+        <span>ISO / Open Standards</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: #ffffff;
+    border-top: 1px solid var(--border-subtle);
+    margin-top: auto;
+  }
+
+  .disclaimer-banner {
+    background: #f8fafc;
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 16px 0;
+  }
+
+  .disclaimer-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .info-icon {
+    color: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .disclaimer-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .disclaimer-text strong {
+    color: var(--text-main);
+  }
+
+  .footer-main {
+    padding-top: 56px;
+    padding-bottom: 32px;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.2fr 1.4fr;
+    gap: 40px;
+    margin-bottom: 48px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+
+  .brand-logo {
+    border-radius: 8px;
+  }
+
+  .brand-name {
+    color: var(--text-main);
+  }
+
+  .brand-dot {
+    color: var(--color-primary);
+  }
+
+  .company-attribution {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 8px 0 14px;
+  }
+
+  .attribution-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #94a3b8;
+  }
+
+  .company-logo-link {
+    display: inline-block;
+    transition: opacity 0.2s ease;
+    opacity: 0.85;
+  }
+
+  .company-logo-link:hover {
+    opacity: 1;
+  }
+
+  .company-logo-img {
+    height: 18px;
+    width: auto;
+    display: block;
+  }
+
+  .company-inline-link {
+    color: #0f172a;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: #cbd5e1;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease;
+  }
+
+  .company-inline-link:hover {
+    color: var(--color-primary);
+  }
+
+  .brand-desc {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin-bottom: 18px;
+  }
+
+  .badge-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tech-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: var(--text-body);
+    font-family: var(--font-mono);
+  }
+
+  .footer-heading {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  .footer-links {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .footer-links a {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .footer-links a:hover {
+    color: var(--color-primary);
+    padding-left: 2px;
+  }
+
+  .deletion-link {
+    color: var(--status-overdue) !important;
+    font-weight: 600;
+  }
+
+  .deletion-link:hover {
+    color: #991b1b !important;
+  }
+
+  .footer-subtext {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .playstore-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #0f172a;
+    border: 1px solid #0f172a;
+    color: #ffffff;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
+  }
+
+  .playstore-btn:hover {
+    background: #1e293b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(15, 23, 42, 0.2);
+  }
+
+  .play-icon {
+    color: #ffffff;
+  }
+
+  .play-text {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+
+  .small-text {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #cbd5e1;
+    font-weight: 600;
+  }
+
+  .large-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+  }
+
+  .security-seal {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .security-seal svg {
+    color: var(--status-paid-on-time);
+  }
+
+  .footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 24px;
+    border-top: 1px solid var(--border-subtle);
+    font-size: 13px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .bottom-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  @media (max-width: 1024px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .playstore-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

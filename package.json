@@ -8,9 +8,11 @@
     "dev:server": "concurrently -k -p \"[{name}]\" -n \"api,mobile\" -c \"cyan.bold,magenta.bold\" \"pnpm --filter committee-ledger-api dev\" \"pnpm --filter committee-ledger-mobile dev:server\"",
     "dev:api": "pnpm --filter committee-ledger-api dev",
     "dev:mobile": "pnpm --filter committee-ledger-mobile dev",
+    "dev:web": "pnpm --filter dhurmit-web dev",
     "dev:parallel": "pnpm -r --parallel run dev",
     "test": "pnpm --filter committee-ledger-api test && pnpm --filter committee-ledger-mobile test",
-    "build": "pnpm --filter committee-ledger-api build && pnpm --filter committee-ledger-mobile build:web"
+    "build": "pnpm --filter committee-ledger-api build && pnpm --filter committee-ledger-mobile build:web",
+    "build:web-site": "pnpm --filter dhurmit-web build"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

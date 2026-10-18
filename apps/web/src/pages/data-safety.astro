@@ -1,0 +1,113 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Google Play Data Safety Declaration | Dhurmit Ledger" 
+  description="Detailed Google Play Store Data Safety section declarations, encryption standards, and user data policies for Dhurmit (Committee Ledger)."
+  activePath="/privacy/"
+>
+  <div class="compliance-page">
+    <div class="container">
+      <div class="compliance-header">
+        <span class="badge" style="background: #dcfce7; border-color: #86efac; color: #15803d;">
+          Google Play Store Compliance
+        </span>
+        <h1 class="page-title">Google Play Data Safety Declaration</h1>
+        <p class="page-subtitle">
+          Official transparency disclosures for Google Play Console reviewers and Dhurmit users.
+        </p>
+      </div>
+
+      <div class="compliance-doc">
+        <div class="callout-box callout-info">
+          <strong>Reviewer Quick Summary:</strong> Dhurmit (<code>app.dhurmit.com</code>) is a software recordkeeping tool. It does NOT process in-app payments, hold funds, or transmit electronic currency. All financial entries are recorded manually by users for ledger accounting purposes only.
+        </div>
+
+        <h2>1. Data Safety Overview Table</h2>
+        <div class="table-wrapper" style="margin-top: 16px; margin-bottom: 24px; overflow-x: auto; border: 1px solid #cbd5e1; border-radius: var(--radius-md);">
+          <table class="comparison-table" style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background: #f8fafc; text-align: left;">
+                <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1; color: var(--text-main); font-weight: 700;">Data Type</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1; color: var(--text-main); font-weight: 700;">Collected?</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1; color: var(--text-main); font-weight: 700;">Shared?</th>
+                <th style="padding: 12px 16px; border-bottom: 1px solid #cbd5e1; color: var(--text-main); font-weight: 700;">Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;"><strong>User Name</strong></td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: 600;">Yes</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #b91c1c; font-weight: 600;">No</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">Account profile & committee member roster display</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;"><strong>Email Address</strong></td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: 600;">Yes</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #b91c1c; font-weight: 600;">No</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">Account login, authentication & security notifications</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;"><strong>Phone Number (Optional)</strong></td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: 600;">Yes (Optional)</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #b91c1c; font-weight: 600;">No</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">Member roster identification & WhatsApp statement generator</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;"><strong>Financial / Contribution Data</strong></td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: 600;">Yes</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #b91c1c; font-weight: 600;">No</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">Manual bookkeeping records (no bank account credentials, no credit cards)</td>
+              </tr>
+              <tr>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;"><strong>Diagnostics & Crash Logs</strong></td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #15803d; font-weight: 600;">Yes</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #b91c1c; font-weight: 600;">No</td>
+                <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">App stability, bug troubleshooting, offline sync debugging</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>2. Security Practices</h2>
+        <ul>
+          <li><strong>Data Encryption in Transit:</strong> All data transmitted between the Android app and the API server uses HTTPS over TLS 1.3 with modern cryptographic cipher suites.</li>
+          <li><strong>Data Encryption at Rest:</strong> Local offline data is stored within an encrypted SQLite sandbox protected by Android Keystore on the device.</li>
+          <li><strong>Account & Data Deletion:</strong> Users can request immediate deletion at any time in-app or via <a href="/delete-account/" style="color: #1e40af; text-decoration: underline;">/delete-account/</a>.</li>
+        </ul>
+
+        <h2>3. Additional Privacy Resources</h2>
+        <p>
+          For the complete legal text, please review our full <a href="/privacy/" style="color: #1e40af; text-decoration: underline;">Privacy Policy</a> and <a href="/terms/" style="color: #1e40af; text-decoration: underline;">Terms & Conditions</a>.
+        </p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .compliance-page {
+    padding-top: 56px;
+    padding-bottom: 80px;
+  }
+
+  .compliance-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 30px auto;
+  }
+
+  .page-title {
+    font-size: 38px;
+    font-weight: 800;
+    margin-top: 16px;
+    margin-bottom: 12px;
+    color: var(--text-main);
+  }
+
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+</style>

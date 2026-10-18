@@ -1,0 +1,137 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Terms & Conditions | Dhurmit Ledger" 
+  description="Terms of Service and legal agreements for using Dhurmit (Committee Ledger) software."
+  activePath="/terms/"
+>
+  <div class="compliance-page">
+    <div class="container">
+      <div class="compliance-header">
+        <span class="badge">Legal Terms</span>
+        <h1 class="page-title">Terms & Conditions of Service</h1>
+        <p class="page-subtitle">
+          Last Updated: October 18, 2026 • Application: <code>app.dhurmit.com</code>
+        </p>
+      </div>
+
+      <div class="compliance-doc">
+        <div class="callout-box callout-warning">
+          <strong>Crucial Operational Disclaimer:</strong> Dhurmit is exclusively a computer software utility for mathematical calculations and recordkeeping. Dhurmit does NOT take custody of funds, does NOT act as an escrow agent, does NOT underwrite credit, and does NOT facilitate electronic payment transmission. All monetary settlement occurs directly between users outside this software.
+        </div>
+
+        <h2>1. Acceptance of Terms</h2>
+        <p>
+          By downloading, installing, accessing, or using the <strong>Dhurmit (Committee Ledger)</strong> mobile application or web portal, you acknowledge that you have read, understood, and agreed to be bound by these Terms & Conditions. If you do not agree to these terms, please refrain from using the software.
+        </p>
+
+        <h2>2. Permitted Use & Software License</h2>
+        <p>
+          We grant you a non-exclusive, non-transferable, revocable license to use the Dhurmit application solely for lawful administrative recordkeeping of Rotating Savings and Credit Associations (ROSCAs), Dhukuti, Chit Funds, Kameti, and community committee finances.
+        </p>
+
+        <h2>3. Role of Dhurmit (Pure Software Recordkeeper)</h2>
+        <p>
+          You explicitly acknowledge and agree that:
+        </p>
+        <ul>
+          <li><strong>Zero Financial Intermediation:</strong> Dhurmit is not a bank, micro-finance institution, credit union, broker, or payment processor.</li>
+          <li><strong>No Custody or Escrow:</strong> We do not hold bank accounts on your behalf. We do not receive, store, or transmit physical or electronic money.</li>
+          <li><strong>Independent Peer Settlement:</strong> The physical or electronic delivery of committee pot payouts and member contributions happens independently between you and your trusted peers.</li>
+          <li><strong>No Default Guarantee:</strong> Dhurmit cannot and does not guarantee that members in your committee will fulfill their financial promises or pay on time. You assume full personal responsibility for selecting trustworthy committee participants.</li>
+        </ul>
+
+        <h2>4. User Responsibilities & Account Security</h2>
+        <ul>
+          <li><strong>Accurate Entry:</strong> You are solely responsible for verifying the accuracy of all numbers, member names, payment dates, and late penalties entered into the ledger.</li>
+          <li><strong>Credential Safeguarding:</strong> You must maintain the confidentiality of your organizer login password and multi-factor authentication credentials.</li>
+          <li><strong>Device Security:</strong> Because Dhurmit maintains an encrypted offline-first SQLite database on your device, you are responsible for maintaining device passcodes, biometric locks, and operating system updates.</li>
+        </ul>
+
+        <h2>5. Prohibited Activities</h2>
+        <p>You agree not to use Dhurmit to:</p>
+        <ul>
+          <li>Operate unlawful Ponzi schemes, fraudulent pyramid schemes, or illegal multi-level marketing operations.</li>
+          <li>Violate regional anti-money laundering (AML) laws or counter-terrorist financing regulations.</li>
+          <li>Reverse engineer, decompile, or attempt to extract the source code or proprietary cryptographic logic of the application without express authorization.</li>
+          <li>Impersonate any other individual or falsely represent committee membership to defraud community members.</li>
+        </ul>
+
+        <h2>6. Intellectual Property Rights</h2>
+        <p>
+          The Dhurmit name, logo, UI/UX designs, source code, documentation, and mathematical algorithms are the exclusive intellectual property of Dhurmit Ledger Technologies.
+        </p>
+
+        <h2>7. Limitation of Liability</h2>
+        <p>
+          To the maximum extent permitted by applicable law, Dhurmit, its founders, contributors, and technical partners shall not be held liable for:
+        </p>
+        <ul>
+          <li>Any default, non-payment, insolvency, or bankruptcy of any member of your committee.</li>
+          <li>Loss of local offline data resulting from hardware destruction, device theft, or operating system wiping prior to cloud synchronization.</li>
+          <li>Interpersonal disputes, community disagreements, or civil claims arising from committee rules established by organizers.</li>
+          <li>Any indirect, incidental, punitive, or consequential damages whatsoever.</li>
+        </ul>
+
+        <h2>8. Termination of Service</h2>
+        <p>
+          We reserve the right to suspend or terminate accounts that violate these Terms or engage in fraudulent activities. Users may terminate their agreement at any time by requesting account deletion via the app or through <a href="/delete-account/" style="color: #1e40af; text-decoration: underline;">/delete-account/</a>.
+        </p>
+
+        <h2>9. Governing Law & Jurisdiction</h2>
+        <p>
+          These Terms shall be governed and interpreted in accordance with the laws of Nepal and recognized international digital software commerce standards, without regard to conflict of law principles.
+        </p>
+
+        <h2>10. Modifications to Terms</h2>
+        <p>
+          We reserve the right to update these terms as our services evolve. Continued use of the application after revised terms are published constitutes your acceptance of the changes.
+        </p>
+
+        <h2>11. Contact Information</h2>
+        <p>
+          For legal inquiries regarding these Terms & Conditions, please contact:
+        </p>
+        <div class="callout-box callout-info">
+          <strong>Legal Affairs & Compliance:</strong><br />
+          Email: <a href="mailto:legal@dhurmit.app" style="color: #1e40af; text-decoration: underline;">legal@dhurmit.app</a><br />
+          Contact Portal: <a href="/contact/" style="color: #1e40af; text-decoration: underline;">https://dhurmit.simplicion.com/contact/</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .compliance-page {
+    padding-top: 56px;
+    padding-bottom: 80px;
+  }
+
+  .compliance-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 30px auto;
+  }
+
+  .page-title {
+    font-size: 38px;
+    font-weight: 800;
+    margin-top: 16px;
+    margin-bottom: 12px;
+    color: var(--text-main);
+  }
+
+  .page-subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .page-title {
+      font-size: 30px;
+    }
+  }
+</style>

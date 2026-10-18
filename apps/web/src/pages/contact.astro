@@ -1,0 +1,477 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Contact Us & Support | Dhurmit Ledger" 
+  description="Get in touch with the Dhurmit team for technical support, offline sync questions, account assistance, or grievance redressal."
+  activePath="/contact/"
+>
+  <div class="contact-page">
+    <div class="container">
+      <div class="contact-header">
+        <span class="badge">Direct Assistance</span>
+        <h1 class="page-title">We're Here to Help</h1>
+        <p class="page-subtitle">
+          Have questions about setting up your Dhukuti, offline synchronization, or need support? Our dedicated engineering and customer success team is ready to assist.
+        </p>
+      </div>
+
+      <div class="grid-2 contact-layout">
+        <!-- Left: Contact info & Channels -->
+        <div class="contact-info-panel">
+          <div class="glass-card info-card">
+            <h2 class="card-title">Official Contact Channels</h2>
+            <p class="card-sub">Reach our specialized teams directly via verified email addresses:</p>
+
+            <div class="channel-list">
+              <div class="channel-item">
+                <div class="channel-icon icon-blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                </div>
+                <div class="channel-details">
+                  <span class="channel-title">Technical & App Support</span>
+                  <a href="mailto:support@dhurmit.app" class="channel-link">support@dhurmit.app</a>
+                  <span class="channel-sla">Average response time: &lt; 24 hours</span>
+                </div>
+              </div>
+
+              <div class="channel-item">
+                <div class="channel-icon icon-purple">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </div>
+                <div class="channel-details">
+                  <span class="channel-title">Data Privacy & Account Erasure</span>
+                  <a href="mailto:privacy@dhurmit.app" class="channel-link">privacy@dhurmit.app</a>
+                  <span class="channel-sla">Dedicated DPO review</span>
+                </div>
+              </div>
+
+              <div class="channel-item">
+                <div class="channel-icon icon-green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                </div>
+                <div class="channel-details">
+                  <span class="channel-title">Legal & Partnership Inquiries</span>
+                  <a href="mailto:legal@dhurmit.app" class="channel-link">legal@dhurmit.app</a>
+                  <span class="channel-sla">Corporate & regulatory affairs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grievance Redressal Card -->
+          <div class="glass-card grievance-card">
+            <h3 class="grievance-heading">Regulatory & Grievance Redressal</h3>
+            <p class="grievance-text">
+              In accordance with Google Play Store standards and local digital intermediary guidelines, users may address grievances directly to our designated officer:
+            </p>
+            <div class="officer-box">
+              <span class="officer-name">Grievance Officer: Anup Sharma</span>
+              <span class="officer-contact">Email: grievance@dhurmit.app</span>
+              <span class="officer-address">HQ: Dhurmit Ledger Technologies, New Road, Pokhara / Kathmandu, Nepal</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Support Form -->
+        <div class="glass-card form-card">
+          <h2 class="form-title">Send Us a Direct Message</h2>
+          <p class="form-desc">Fill out the form below and an engineer or support specialist will respond to you.</p>
+
+          <form id="contact-form" class="contact-form">
+            <div class="form-group">
+              <label for="contact-name">Your Full Name *</label>
+              <input 
+                type="text" 
+                id="contact-name" 
+                name="name" 
+                required 
+                placeholder="Ramesh Adhikari" 
+                class="form-input" 
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="contact-email">Email Address *</label>
+              <input 
+                type="email" 
+                id="contact-email" 
+                name="email" 
+                required 
+                placeholder="ramesh@example.com" 
+                class="form-input" 
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="contact-category">Inquiry Subject *</label>
+              <select id="contact-category" name="category" class="form-input">
+                <option value="technical">Technical Bug / App Issue</option>
+                <option value="sync">Offline Synchronization Question</option>
+                <option value="committee_setup">Advice on Setting Up a Large Committee</option>
+                <option value="feature">Feature Suggestion</option>
+                <option value="other">General Question</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="contact-message">Your Message *</label>
+              <textarea 
+                id="contact-message" 
+                name="message" 
+                rows="5" 
+                required 
+                placeholder="Describe your inquiry or the issue you are experiencing..." 
+                class="form-input form-textarea"
+              ></textarea>
+            </div>
+
+            <button type="submit" id="contact-submit-btn" class="btn btn-primary" style="width: 100%;">
+              Send Support Message
+            </button>
+
+            <!-- Success confirmation -->
+            <div id="contact-success" class="submission-success" style="display: none;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28" style="color: #15803d; margin: 0 auto 10px auto;">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+              <h4>Message Dispatched!</h4>
+              <p>Thank you for reaching out. A confirmation has been registered and a support engineer will reply within 24 hours.</p>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <section class="faq-section">
+        <div class="section-header">
+          <span class="section-badge">Fast Answers</span>
+          <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+
+        <div class="faq-grid">
+          <div class="glass-card faq-item">
+            <h3 class="faq-q">Does Dhurmit hold or handle our group's money?</h3>
+            <p class="faq-a">
+              <strong>No. Absolutely not.</strong> Dhurmit is strictly an accounting and mathematical calculation tool. All physical cash or digital bank transfers happen directly between you and your trusted members outside the app.
+            </p>
+          </div>
+
+          <div class="glass-card faq-item">
+            <h3 class="faq-q">What happens if a member makes a partial payment?</h3>
+            <p class="faq-a">
+              Dhurmit's automated FIFO (First-In, First-Out) engine allocates the partial deposit to their oldest overdue cycle and late fees first, marking the current cycle as <em>Partial</em> and updating remaining balances automatically.
+            </p>
+          </div>
+
+          <div class="glass-card faq-item">
+            <h3 class="faq-q">Can I record payments without an internet connection?</h3>
+            <p class="faq-a">
+              <strong>Yes.</strong> Dhurmit is built local-first using SQLite. You can record deposits anywhere—inside rural wholesale markets, basements, or remote locations. The app syncs seamlessly once connectivity is restored.
+            </p>
+          </div>
+
+          <div class="glass-card faq-item">
+            <h3 class="faq-q">How do members view their own statements?</h3>
+            <p class="faq-a">
+              Members can open the app and tap "Join as Member" on the home screen. By entering their phone number and the 6-character committee code, they get read-only access to verify their payments and payout turns.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .contact-page {
+    padding-top: 56px;
+    padding-bottom: 80px;
+  }
+
+  .contact-header {
+    text-align: center;
+    max-width: 720px;
+    margin: 0 auto 48px auto;
+  }
+
+  .page-title {
+    font-size: 40px;
+    font-weight: 800;
+    margin-top: 16px;
+    margin-bottom: 14px;
+    color: var(--text-main);
+  }
+
+  .page-subtitle {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--text-body);
+  }
+
+  .contact-layout {
+    gap: 40px;
+    align-items: start;
+    margin-bottom: 80px;
+  }
+
+  .contact-info-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .info-card {
+    padding: 32px;
+  }
+
+  .card-title {
+    font-size: 20px;
+    margin-bottom: 6px;
+    color: var(--text-main);
+  }
+
+  .card-sub {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+  }
+
+  .channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .channel-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .channel-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .icon-blue { background: #dbeafe; border: 1px solid #bfdbfe; color: #1e40af; }
+  .icon-purple { background: #ede9fe; border: 1px solid #ddd6fe; color: #7c3aed; }
+  .icon-green { background: #dcfce7; border: 1px solid #bbf7d0; color: #15803d; }
+
+  .channel-details {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .channel-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .channel-link {
+    font-size: 14.5px;
+    color: #0284c7;
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+
+  .channel-link:hover {
+    text-decoration: underline;
+  }
+
+  .channel-sla {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .grievance-card {
+    padding: 24px 30px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+  }
+
+  .grievance-heading {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .grievance-text {
+    font-size: 13px;
+    color: var(--text-body);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+
+  .officer-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12.5px;
+    color: var(--text-body);
+  }
+
+  .officer-name {
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .form-card {
+    padding: 32px;
+  }
+
+  .form-title {
+    font-size: 20px;
+    margin-bottom: 6px;
+    color: var(--text-main);
+  }
+
+  .form-desc {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin-bottom: 22px;
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .form-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+    transition: border-color 0.2s ease;
+    font-family: var(--font-body);
+  }
+
+  .form-input:focus {
+    border-color: #1e40af;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 120px;
+  }
+
+  .submission-success {
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: var(--radius-md);
+    padding: 18px;
+    text-align: center;
+    margin-top: 18px;
+  }
+
+  .submission-success h4 {
+    color: #15803d;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .submission-success p {
+    font-size: 13px;
+    color: #14532d;
+    margin: 0;
+  }
+
+  /* FAQ */
+  .faq-section {
+    padding-top: 40px;
+  }
+
+  .faq-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .faq-item {
+    padding: 24px 28px;
+  }
+
+  .faq-q {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 10px;
+  }
+
+  .faq-a {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text-body);
+    margin: 0;
+  }
+
+  @media (max-width: 868px) {
+    .page-title {
+      font-size: 32px;
+    }
+    .contact-layout {
+      grid-template-columns: 1fr;
+    }
+    .faq-grid {
+      grid-template-columns: 1fr;
+    }
+    .form-card {
+      padding: 24px;
+    }
+  }
+</style>
+
+<script>
+  const contactForm = document.getElementById('contact-form') as HTMLFormElement | null;
+  const submitBtn = document.getElementById('contact-submit-btn') as HTMLButtonElement | null;
+  const successBox = document.getElementById('contact-success');
+
+  if (contactForm && submitBtn && successBox) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Transmitting Message...';
+
+      setTimeout(() => {
+        submitBtn.style.display = 'none';
+        successBox.style.display = 'block';
+      }, 700);
+    });
+  }
+</script>
