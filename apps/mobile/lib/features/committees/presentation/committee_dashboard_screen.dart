@@ -13,6 +13,8 @@ import '../../collections/presentation/collection_history_screen.dart';
 import '../../collections/presentation/record_collection_bottom_sheet.dart';
 import '../../bidding/presentation/bidding_rounds_screen.dart';
 
+import '../../../core/sync/offline_cache_store.dart';
+
 class CommitteeDashboardScreen extends StatefulWidget {
   final String committeeId;
 
@@ -47,20 +49,58 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
       _error = null;
     });
 
+    final cacheStore = context.read<OfflineCacheStore>();
+    final authState = context.read<AuthState>();
+    final wsId = authState.activeWorkspace?['id']?.toString() ?? 'default';
+
     try {
-      final client = context.read<AuthState>().apiClient;
+      final client = authState.apiClient;
       final res = await client.get('/committees/${widget.committeeId}/dashboard');
       if (mounted) {
         setState(() {
           _committee = res as Map<String, dynamic>;
           _isLoading = false;
+          _error = null;
         });
+        return;
       }
-    } catch (e) {
+    } catch (_) {
+      // Offline fallback: load from OfflineCacheStore
+      final cachedCommittees = cacheStore.getCachedCommittees(wsId);
+      final comm = cachedCommittees.firstWhere(
+        (c) => c['id'] == widget.committeeId,
+        orElse: () => <String, dynamic>{},
+      );
+
+      final obligations = cacheStore.getCachedObligations(widget.committeeId);
+      final collections = cacheStore.getCachedCollections(widget.committeeId);
+      final members = cacheStore.getCachedMembers(widget.committeeId);
+
+      BigInt totalExpected = BigInt.zero;
+      BigInt totalCollected = BigInt.zero;
+      for (final ob in obligations) {
+        totalExpected += BigInt.tryParse((ob['dueAmountMinor'] ?? '0').toString()) ?? BigInt.zero;
+        totalCollected += BigInt.tryParse((ob['alreadyAllocatedMinor'] ?? '0').toString()) ?? BigInt.zero;
+      }
+
       if (mounted) {
         setState(() {
-          _error = e.toString();
+          _committee = {
+            'id': widget.committeeId,
+            'name': comm['name'] ?? 'Committee',
+            'status': comm['status'] ?? 'ACTIVE',
+            'code': comm['code'] ?? '',
+            'totalExpectedMinor': totalExpected.toString(),
+            'totalCollectedMinor': totalCollected.toString(),
+            'totalOutstandingMinor': (totalExpected > totalCollected ? totalExpected - totalCollected : BigInt.zero).toString(),
+            'overdueMembersCount': 0,
+            'members': members,
+            'obligations': obligations,
+            'collections': collections,
+            'isOffline': true,
+          };
           _isLoading = false;
+          _error = null;
         });
       }
     }

@@ -9,6 +9,9 @@ import '../../../core/location/country_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/money_input_field.dart';
+import '../../../core/sync/offline_cache_store.dart';
+import '../../../core/sync/sync_engine.dart';
+import '../../../core/sync/sync_outbox_item.dart';
 
 class CreateCommitteeScreen extends StatefulWidget {
   const CreateCommitteeScreen({super.key});
@@ -74,43 +77,110 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
 
     setState(() => _isLoading = true);
 
-    try {
-      final client = context.read<AuthState>().apiClient;
-      final countryProvider = context.read<CountryProvider>();
-      final effectiveCountry = _customCountry ?? countryProvider.activeCountry;
-      final startDateStr = DateFormat('yyyy-MM-dd').format(_startDate);
+    final countryProvider = context.read<CountryProvider>();
+    final effectiveCountry = _customCountry ?? countryProvider.activeCountry;
+    final startDateStr = DateFormat('yyyy-MM-dd').format(_startDate);
+    final syncEngine = context.read<SyncEngine>();
+    final cacheStore = context.read<OfflineCacheStore>();
+    final authState = context.read<AuthState>();
+    final wsId = authState.activeWorkspace?['id']?.toString() ?? 'default';
 
-      await client.post('/committees', body: {
-        'name': _nameController.text.trim(),
-        'currencyCode': effectiveCountry.currencyCode,
-        'timezone': effectiveCountry.timeZone,
-        'startDate': startDateStr,
-        'duration': {
-          'count': _durationCount,
-          'unit': _durationUnit,
-        },
-        'schedule': {
-          'frequency': _frequency,
-          'rule': _frequency == 'MONTHLY' ? <String, dynamic>{'dayOfMonth': _dayOfMonth} : <String, dynamic>{},
-        },
-        'contributionAmountMinor': _amountPaisa.toInt(),
-        'allowPartialPayment': _allowPartialPayment,
-        'allocationPolicy': _allocationPolicy,
-      });
+    final committeePayload = {
+      'name': _nameController.text.trim(),
+      'currencyCode': effectiveCountry.currencyCode,
+      'timezone': effectiveCountry.timeZone,
+      'startDate': startDateStr,
+      'duration': {
+        'count': _durationCount,
+        'unit': _durationUnit,
+      },
+      'schedule': {
+        'frequency': _frequency,
+        'rule': _frequency == 'MONTHLY' ? <String, dynamic>{'dayOfMonth': _dayOfMonth} : <String, dynamic>{},
+      },
+      'contributionAmountMinor': _amountPaisa.toInt(),
+      'allowPartialPayment': _allowPartialPayment,
+      'allocationPolicy': _allocationPolicy,
+    };
+
+    if (!syncEngine.isOnline) {
+      final localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      final localCommittee = {
+        'id': localId,
+        ...committeePayload,
+        'status': 'DRAFT',
+        'isOfflineCreated': true,
+        'createdAt': DateTime.now().toIso8601String(),
+        'membersCount': 0,
+      };
+
+      final cached = cacheStore.getCachedCommittees(wsId);
+      cached.insert(0, localCommittee);
+      await cacheStore.cacheCommittees(wsId, cached);
+
+      await syncEngine.enqueueMutation(
+        mutationType: SyncMutationType.createCommittee,
+        endpoint: '/committees',
+        payload: committeePayload,
+      );
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Committee created successfully')),
+        const SnackBar(
+          content: Text('Offline: Committee saved locally! Will sync when connection is restored.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      context.pop(true);
+      return;
+    }
+
+    try {
+      final client = authState.apiClient;
+      final res = await client.post('/committees', body: committeePayload);
+      if (res is Map<String, dynamic>) {
+        final cached = cacheStore.getCachedCommittees(wsId);
+        cached.insert(0, res);
+        await cacheStore.cacheCommittees(wsId, cached);
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Committee created successfully!'),
+          backgroundColor: Colors.green,
+        ),
       );
       context.pop(true);
     } catch (e) {
+      // Network drop fallback: queue offline
+      final localId = 'offline_${DateTime.now().millisecondsSinceEpoch}';
+      final localCommittee = {
+        'id': localId,
+        ...committeePayload,
+        'status': 'DRAFT',
+        'isOfflineCreated': true,
+        'createdAt': DateTime.now().toIso8601String(),
+        'membersCount': 0,
+      };
+
+      final cached = cacheStore.getCachedCommittees(wsId);
+      cached.insert(0, localCommittee);
+      await cacheStore.cacheCommittees(wsId, cached);
+
+      await syncEngine.enqueueMutation(
+        mutationType: SyncMutationType.createCommittee,
+        endpoint: '/committees',
+        payload: committeePayload,
+      );
+
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-          backgroundColor: Theme.of(context).colorScheme.error,
+        const SnackBar(
+          content: Text('Network unreachable: Committee saved locally and queued for sync.'),
+          backgroundColor: Colors.orange,
         ),
       );
+      context.pop(true);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -169,7 +239,7 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                'Time Zone: ${effectiveCountry.timeZone} • OpenStreetMap',
+                                'Time Zone: ${effectiveCountry.timeZone}',
                                 style: TextStyle(fontSize: 11, color: tokens.onSurfaceVariant),
                               ),
                             ],

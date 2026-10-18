@@ -208,7 +208,7 @@ void main() {
       await tester.pump();
     });
 
-    testWidgets('LoginScreen displays Work Offline button and tapping it activates offline organizer session', (tester) async {
+    testWidgets('LoginScreen enforces mandatory login: Work Offline button removed, official auth actions present', (tester) async {
       final auth = AuthState(apiClient: ApiClient(baseUrl: 'http://localhost:4000/api/v1'));
       await auth.checkAuth();
 
@@ -219,16 +219,13 @@ void main() {
         cacheStore: cacheStore,
       ));
 
+      // Mandatory sign-in requirement: Work Offline button should NOT exist on login screen
       final offlineBtn = find.text('Work Offline (No Internet Required)');
-      expect(offlineBtn, findsOneWidget);
+      expect(offlineBtn, findsNothing);
 
-      await tester.ensureVisible(offlineBtn);
-      await tester.tap(offlineBtn);
-      await tester.pump();
-
-      expect(auth.isAuthenticated, isTrue);
-      expect(auth.isOrganizer, isTrue);
-      expect(auth.activeWorkspace?['id'], equals('offline_workspace'));
+      // Verify mandatory authentication buttons are displayed
+      expect(find.text('Continue as Committee Organizer'), findsOneWidget);
+      expect(find.text('Join as a Member'), findsOneWidget);
     });
   });
 }

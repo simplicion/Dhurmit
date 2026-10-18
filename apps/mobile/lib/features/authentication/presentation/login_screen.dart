@@ -18,7 +18,7 @@ import 'member_login_bottom_sheet.dart';
 /// - Dynamic Country selector (OpenStreetMap)
 /// - Official 180 Identity SSO Button for Committee Organizers
 /// - Direct "Join as a Member" button opening MemberLoginBottomSheet
-/// - Instant "Continue in Offline Mode" for 100% offline usage
+/// - Sign in once with internet; all subsequent app usage operates fully offline
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: Text('Cannot launch browser. You can use "Continue in Offline Mode" below.'),
+                content: Text('Cannot launch browser. Please verify internet connection and browser availability.'),
               ),
             );
           }
@@ -271,34 +271,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.3,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  // ─── INSTANT OFFLINE LEDGER MODE (Zero Internet Required) ───
-                  TextButton.icon(
-                    style: TextButton.styleFrom(
-                      foregroundColor: tokens.onSurfaceVariant,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                    ),
-                    onPressed: () async {
-                      final authState = context.read<AuthState>();
-                      await authState.enterOfflineMode();
-                      if (!context.mounted) return;
-                      try {
-                        context.go('/home');
-                      } catch (_) {
-                        // Fallback when rendered without GoRouter in isolated tests
-                      }
-                    },
-                    icon: const Icon(Icons.cloud_off_rounded, size: 18),
-                    label: const Text(
-                      'Work Offline (No Internet Required)',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

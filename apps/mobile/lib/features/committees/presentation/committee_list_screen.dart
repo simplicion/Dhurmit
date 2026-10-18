@@ -73,14 +73,21 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
       }
     } catch (e) {
       if (mounted) {
-        if (_committees.isNotEmpty) {
-          // Keep showing cached data silently without disrupting user
+        final errStr = e.toString();
+        final isOffline = errStr.contains('OFFLINE') ||
+            errStr.contains('Network unreachable') ||
+            errStr.contains('SocketException') ||
+            errStr.contains('Failed host lookup') ||
+            errStr.contains('offline-first');
+        if (_committees.isNotEmpty || isOffline) {
+          // Keep showing cached data or friendly empty state silently without disrupting user
           setState(() {
             _isLoading = false;
+            _error = null;
           });
         } else {
           setState(() {
-            _error = e.toString();
+            _error = errStr;
             _isLoading = false;
           });
         }

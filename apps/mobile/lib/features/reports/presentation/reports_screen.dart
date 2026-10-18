@@ -7,6 +7,8 @@ import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/state_widgets.dart';
 
+import '../../../core/sync/offline_cache_store.dart';
+
 class ReportsScreen extends StatefulWidget {
   final String? committeeId;
 
@@ -45,31 +47,41 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
       _error = null;
     });
 
-    try {
-      final client = context.read<AuthState>().apiClient;
-      final commRes = await client.get('/committees');
-      if (mounted) {
-        final List<dynamic> list = commRes is List ? commRes : <dynamic>[];
-        setState(() {
-          _committees = list;
-          if (_selectedCommitteeId == null && list.isNotEmpty) {
-            _selectedCommitteeId = (list.first as Map<String, dynamic>)['id'] as String?;
-          }
-        });
+    final cacheStore = context.read<OfflineCacheStore>();
+    final authState = context.read<AuthState>();
+    final wsId = authState.activeWorkspace?['id']?.toString() ?? 'default';
 
-        if (_selectedCommitteeId != null) {
-          await _loadCommitteeReports(_selectedCommitteeId!);
-        } else {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+    List<dynamic> list = [];
+    try {
+      final client = authState.apiClient;
+      final commRes = await client.get('/committees');
+      if (commRes is List) {
+        list = commRes;
+        await cacheStore.cacheCommittees(wsId, list.cast<Map<String, dynamic>>());
       }
-    } catch (e) {
-      if (mounted) {
+    } catch (_) {
+      // Offline fallback: load cached committees
+      list = cacheStore.getCachedCommittees(wsId);
+    }
+
+    if (list.isEmpty) {
+      list = cacheStore.getCachedCommittees(wsId);
+    }
+
+    if (mounted) {
+      setState(() {
+        _committees = list;
+        if (_selectedCommitteeId == null && list.isNotEmpty) {
+          _selectedCommitteeId = (list.first as Map<String, dynamic>)['id'] as String?;
+        }
+      });
+
+      if (_selectedCommitteeId != null) {
+        await _loadCommitteeReports(_selectedCommitteeId!);
+      } else {
         setState(() {
-          _error = e.toString();
           _isLoading = false;
+          _error = null;
         });
       }
     }
@@ -81,8 +93,11 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
       _error = null;
     });
 
+    final cacheStore = context.read<OfflineCacheStore>();
+    final authState = context.read<AuthState>();
+
     try {
-      final client = context.read<AuthState>().apiClient;
+      final client = authState.apiClient;
       final sumRes = await client.get('/committees/$committeeId/reports/summary');
       final overRes = await client.get('/committees/$committeeId/reports/overdue');
 
@@ -91,13 +106,60 @@ class _ReportsScreenState extends State<ReportsScreen> with SingleTickerProvider
           _summary = sumRes as Map<String, dynamic>;
           _overdueList = (overRes as Map<String, dynamic>)['overdueMembers'] as List? ?? [];
           _isLoading = false;
+          _error = null;
         });
+        return;
       }
-    } catch (e) {
+    } catch (_) {
+      // Offline: Calculate summary and overdue figures dynamically from local cache
+      final obligations = cacheStore.getCachedObligations(committeeId);
+      final collections = cacheStore.getCachedCollections(committeeId);
+      final members = cacheStore.getCachedMembers(committeeId);
+
+      BigInt totalExpected = BigInt.zero;
+      BigInt totalCollected = BigInt.zero;
+      BigInt totalOutstanding = BigInt.zero;
+      final List<Map<String, dynamic>> overdueMembers = [];
+
+      for (final ob in obligations) {
+        final due = BigInt.tryParse((ob['dueAmountMinor'] ?? '0').toString()) ?? BigInt.zero;
+        final allocated = BigInt.tryParse((ob['alreadyAllocatedMinor'] ?? '0').toString()) ?? BigInt.zero;
+        final remaining = BigInt.tryParse((ob['remainingAmountMinor'] ?? '0').toString()) ?? (due > allocated ? due - allocated : BigInt.zero);
+        final status = ob['status']?.toString() ?? '';
+
+        totalExpected += due;
+        totalCollected += allocated;
+
+        if (remaining > BigInt.zero) {
+          totalOutstanding += remaining;
+        }
+
+        if (remaining > BigInt.zero && (status == 'UNPAID_OVERDUE' || status == 'PARTIALLY_PAID')) {
+          final memberName = ob['memberName'] ?? 'Member';
+          final memberId = ob['memberId'] ?? '';
+          overdueMembers.add({
+            'memberId': memberId,
+            'memberName': memberName,
+            'overdueCount': 1,
+            'totalOverdueMinor': remaining.toString(),
+            'oldestOverdueDate': ob['dueDate'] ?? '',
+          });
+        }
+      }
+
       if (mounted) {
         setState(() {
-          _error = e.toString();
+          _summary = {
+            'totalExpectedMinor': totalExpected.toString(),
+            'totalCollectedMinor': totalCollected.toString(),
+            'totalOutstandingMinor': totalOutstanding.toString(),
+            'memberCount': members.isNotEmpty ? members.length : 1,
+            'totalCollectionsCount': collections.length,
+            'isOfflineCalculated': true,
+          };
+          _overdueList = overdueMembers;
           _isLoading = false;
+          _error = null;
         });
       }
     }
