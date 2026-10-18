@@ -497,7 +497,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     isLoading: _isLoading,
                     title: _selectedRole == 'ORGANIZER'
                         ? 'Continue as Committee Organizer'
-                        : 'Sign In via 180 Identity',
+                        : 'Continue as Community Member',
                     subtitle: 'Universal WhatsApp OTP & Biometric Passkey',
                     onPressed: _handle180SignIn,
                   ),

@@ -75,7 +75,7 @@ class _MemberListScreenState extends State<MemberListScreen> {
     showDialog<void>(
       context: context,
       builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
+        builder: (dialogCtx, setDialogState) => AlertDialog(
           title: const Row(
             children: [
               Icon(Icons.person_add_alt_1_rounded),
@@ -168,9 +168,10 @@ class _MemberListScreenState extends State<MemberListScreen> {
 
                 if (name.length < 2) return;
 
+                final client = context.read<AuthState>().apiClient;
+                final messenger = ScaffoldMessenger.of(context);
                 Navigator.pop(ctx);
                 try {
-                  final client = context.read<AuthState>().apiClient;
                   await client.post('/committees/${widget.committeeId}/members', body: {
                     'displayName': name,
                     if (phone.isNotEmpty) 'phone': phone,
@@ -180,7 +181,7 @@ class _MemberListScreenState extends State<MemberListScreen> {
                   widget.onMemberAdded();
                 } catch (e) {
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  messenger.showSnackBar(
                     SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
                   );
                 }
