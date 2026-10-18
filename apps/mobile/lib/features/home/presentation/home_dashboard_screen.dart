@@ -33,7 +33,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           const SyncStatusBanner(),
           Expanded(
             child: IndexedStack(
-              sizing: StackFit.expand,
               index: _currentIndex,
               children: _screens,
             ),

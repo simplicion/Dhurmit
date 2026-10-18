@@ -75,7 +75,16 @@ class AppMoney {
     final rupees = absUnits ~/ BigInt.from(100);
     final paisa = (absUnits % BigInt.from(100)).toInt();
 
-    final formatter = NumberFormat('#,##,##0', activeLocale);
+    NumberFormat formatter;
+    try {
+      formatter = NumberFormat('#,##,##0', activeLocale);
+    } catch (_) {
+      try {
+        formatter = NumberFormat('#,##,##0', 'en_IN');
+      } catch (_) {
+        formatter = NumberFormat('#,##0');
+      }
+    }
     final formattedRupees = formatter.format(rupees.toInt());
     final formattedPaisa = paisa.toString().padLeft(2, '0');
 
@@ -87,7 +96,16 @@ class AppMoney {
     final isNegative = minorUnits < BigInt.zero;
     final absUnits = isNegative ? -minorUnits : minorUnits;
     final rupees = (absUnits ~/ BigInt.from(100)).toInt();
-    final formatter = NumberFormat('#,##,##0', activeLocale);
+    NumberFormat formatter;
+    try {
+      formatter = NumberFormat('#,##,##0', activeLocale);
+    } catch (_) {
+      try {
+        formatter = NumberFormat('#,##,##0', 'en_IN');
+      } catch (_) {
+        formatter = NumberFormat('#,##0');
+      }
+    }
     final sign = isNegative ? '-' : '';
     return '$sign$currencyCode ${formatter.format(rupees)}';
   }

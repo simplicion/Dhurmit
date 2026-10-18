@@ -28,6 +28,10 @@ GoRouter createRouter(AuthState authState) {
         return '/auth/callback?code=$authCode';
       }
 
+      if (state.matchedLocation == '/' || state.matchedLocation.isEmpty) {
+        return isLoggedIn ? '/home' : '/login';
+      }
+
       if (!isLoggedIn && !isLoggingIn && !isCallback) {
         return '/login';
       }
@@ -38,7 +42,12 @@ GoRouter createRouter(AuthState authState) {
 
       return null;
     },
+    errorBuilder: (context, state) => const HomeDashboardScreen(),
     routes: [
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => authState.isAuthenticated ? '/home' : '/login',
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginScreen(),
@@ -53,6 +62,16 @@ GoRouter createRouter(AuthState authState) {
       GoRoute(
         path: '/home',
         builder: (context, state) => const HomeDashboardScreen(),
+        routes: [
+          GoRoute(
+            path: 'settings',
+            redirect: (context, state) => '/settings',
+          ),
+          GoRoute(
+            path: 'reports',
+            redirect: (context, state) => '/reports',
+          ),
+        ],
       ),
       GoRoute(
         path: '/committees/create',

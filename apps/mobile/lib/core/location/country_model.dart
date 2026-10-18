@@ -107,7 +107,9 @@ class CountryProfile {
       currencyCode: currency.$1,
       currencySymbol: currency.$2,
       timeZone: timeZone ?? 'UTC',
-      locale: language != null ? '${language}_$cleanCode' : 'en_$cleanCode',
+      locale: cleanCode == 'NP'
+          ? 'en_IN'
+          : (language != null ? '${language}_$cleanCode' : 'en_$cleanCode'),
       startOfWeek: DateTime.monday,
       calendarType: 'Gregorian',
     );
