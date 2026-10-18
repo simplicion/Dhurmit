@@ -34,6 +34,14 @@
 
   <!-- 180 Core SDK (Universal Identity SSO & Bottom Sheet Engine) -->
   <script src="https://profile.180core.cloud/sdk/v1/180-core-sdk.js"></script>
+  <style>
+    @keyframes one-eighty-fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes one-eighty-fade-out { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes one-eighty-slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes one-eighty-slide-down { from { transform: translateY(0); } to { transform: translateY(100%); } }
+    @keyframes one-eighty-scale-in { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+    @keyframes one-eighty-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  </style>
   <script>
     function handle180Success(data) {
       if (!data) return;
@@ -57,7 +65,7 @@
       }
     }
 
-    // Listen to direct window postMessages from 180 Identity iframe
+    // Direct window postMessages receiver from 180 Identity iframe
     window.addEventListener('message', function(event) {
       var d = event.data;
       if (!d) return;
@@ -72,32 +80,248 @@
     window.launch180BottomSheet = function(clientId, redirectUri) {
       return new Promise(function(resolve) {
         try {
-          if (window.OneEighty && window.OneEighty.auth && window.OneEighty.auth.signIn) {
-            window.OneEighty.auth.signIn({
-              clientId: clientId,
-              redirectUri: redirectUri,
-              authServerUrl: 'https://auth.180workspace.com',
-              uxMode: 'bottom_sheet',
-              environment: 'production',
-              onSuccess: function(res) {
-                handle180Success(res);
-                resolve(JSON.stringify(res || { code: '' }));
-              }
-            }).then(function(res) {
-              if (res) {
-                handle180Success(res);
-                resolve(JSON.stringify(res));
-              }
-            }).catch(function(err) {
-              console.warn('[180 SDK Error]', err);
-              resolve('');
-            });
-            return;
+          var existing = document.getElementById('__180_dhurmit_modal_root__');
+          if (existing) existing.remove();
+
+          var isMobile = (window.innerWidth < 768) || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+          var openTime = Date.now();
+          var isClosed = false;
+
+          // Root overlay
+          var root = document.createElement('div');
+          root.id = '__180_dhurmit_modal_root__';
+          root.style.cssText = [
+            'position: fixed',
+            'top: 0',
+            'left: 0',
+            'width: 100vw',
+            'height: 100vh',
+            'z-index: 2147483647',
+            'display: flex',
+            'flex-direction: column',
+            isMobile ? 'justify-content: flex-end' : 'justify-content: center',
+            'align-items: center',
+            'pointer-events: auto',
+            'font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+          ].join(';');
+
+          // Dark blurred backdrop
+          var backdrop = document.createElement('div');
+          backdrop.style.cssText = [
+            'position: fixed',
+            'top: 0',
+            'left: 0',
+            'width: 100vw',
+            'height: 100vh',
+            'background: rgba(0, 0, 0, 0.78)',
+            'backdrop-filter: blur(10px)',
+            '-webkit-backdrop-filter: blur(10px)',
+            'animation: one-eighty-fade-in 0.22s ease-out forwards',
+            'cursor: pointer'
+          ].join(';');
+
+          // Bottom sheet / modal card
+          var card = document.createElement('div');
+          var cardStyles = [
+            'position: relative',
+            'z-index: 2147483647',
+            'width: 100%',
+            'background: #09090b',
+            'color: #fafafa',
+            'box-shadow: 0 -16px 48px rgba(0,0,0,0.85), 0 24px 64px rgba(0,0,0,0.95)',
+            'display: flex',
+            'flex-direction: column',
+            'overflow: hidden',
+            'transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+          ];
+
+          if (isMobile) {
+            cardStyles.push(
+              'height: 88vh',
+              'max-height: 92vh',
+              'border-radius: 24px 24px 0 0',
+              'border-top: 1px solid rgba(255, 255, 255, 0.16)',
+              'border-left: 1px solid rgba(255, 255, 255, 0.1)',
+              'border-right: 1px solid rgba(255, 255, 255, 0.1)',
+              'transform: translateY(100%)'
+            );
+          } else {
+            cardStyles.push(
+              'max-width: 480px',
+              'height: 720px',
+              'max-height: 90vh',
+              'margin: 0 auto',
+              'border-radius: 20px',
+              'border: 1px solid rgba(255, 255, 255, 0.15)',
+              'animation: one-eighty-scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards'
+            );
           }
+          card.style.cssText = cardStyles.join(';');
+
+          // Header
+          var header = document.createElement('div');
+          header.style.cssText = [
+            'flex-shrink: 0',
+            'padding: ' + (isMobile ? '12px 18px 10px 18px' : '14px 18px'),
+            'display: flex',
+            'flex-direction: column',
+            'align-items: center',
+            'border-bottom: 1px solid rgba(255, 255, 255, 0.08)',
+            'background: #09090b'
+          ].join(';');
+
+          if (isMobile) {
+            var grabHandle = document.createElement('div');
+            grabHandle.style.cssText = 'width: 44px; height: 4px; border-radius: 9999px; background: rgba(255, 255, 255, 0.28); margin-bottom: 8px;';
+            header.appendChild(grabHandle);
+          }
+
+          var navBar = document.createElement('div');
+          navBar.style.cssText = 'width: 100%; display: flex; align-items: center; justify-content: space-between;';
+
+          var brandWrap = document.createElement('div');
+          brandWrap.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+          brandWrap.innerHTML = [
+            '<div style="width: 24px; height: 24px; border-radius: 6px; background: rgba(79, 70, 229, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); display: flex; align-items: center; justify-content: center;">',
+            '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>',
+            '</div>',
+            '<div style="font-size: 13px; font-weight: 700; color: #f4f4f5; letter-spacing: -0.01em;">180 Sovereign Identity</div>'
+          ].join('');
+
+          var closeBtn = document.createElement('button');
+          closeBtn.type = 'button';
+          closeBtn.setAttribute('aria-label', 'Close');
+          closeBtn.style.cssText = 'width: 28px; height: 28px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #e4e4e7; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; outline: none;';
+          closeBtn.innerHTML = '<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+
+          navBar.appendChild(brandWrap);
+          navBar.appendChild(closeBtn);
+          header.appendChild(navBar);
+
+          // Iframe Viewport
+          var iframeWrap = document.createElement('div');
+          iframeWrap.style.cssText = 'flex: 1; width: 100%; height: 100%; position: relative; background: #09090b; overflow: hidden;';
+
+          var spinner = document.createElement('div');
+          spinner.style.cssText = 'position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: #09090b; transition: opacity 0.2s ease; z-index: 1;';
+          spinner.innerHTML = [
+            '<div style="width: 32px; height: 32px; border: 2.5px solid rgba(255, 255, 255, 0.15); border-top-color: #6366f1; border-radius: 50%; animation: one-eighty-spin 0.75s linear infinite;"></div>',
+            '<div style="font-size: 11px; font-weight: 500; color: #a1a1aa; letter-spacing: 0.02em;">Connecting to 180 Sovereign Identity...</div>'
+          ].join('');
+
+          var authUrl = 'https://auth.180workspace.com/auth/login?' + [
+            'client_id=' + encodeURIComponent(clientId || '180_client_3b759b500c4b8a04f888ec3d91a82bd3'),
+            'redirect_uri=' + encodeURIComponent(redirectUri || (window.location.origin + '/auth/callback')),
+            'response_type=code',
+            'scope=' + encodeURIComponent('openid identity:read identity:email identity:phone'),
+            'ux_mode=bottom_sheet',
+            'env=production',
+            'app=auth'
+          ].join('&');
+
+          var iframe = document.createElement('iframe');
+          iframe.src = authUrl;
+          iframe.allow = 'clipboard-write; payment; geolocation';
+          iframe.style.cssText = 'width: 100%; height: 100%; border: none; background: transparent; opacity: 0; transition: opacity 0.25s ease;';
+
+          iframe.onload = function() {
+            spinner.style.opacity = '0';
+            iframe.style.opacity = '1';
+            setTimeout(function() { if (spinner.parentNode) spinner.remove(); }, 220);
+          };
+
+          iframeWrap.appendChild(spinner);
+          iframeWrap.appendChild(iframe);
+          card.appendChild(header);
+          card.appendChild(iframeWrap);
+          root.appendChild(backdrop);
+          root.appendChild(card);
+
+          function cleanup() {
+            window.removeEventListener('message', onMsg);
+            window.removeEventListener('keydown', onKey);
+          }
+
+          function closeSheet(dataResult, isCancel, reason) {
+            console.log('[180 Bottom Sheet closeSheet called]', { isCancel: isCancel, reason: reason, isClosed: isClosed });
+            if (isClosed) return;
+            isClosed = true;
+            cleanup();
+
+            if (isMobile) {
+              card.style.transform = 'translateY(100%)';
+            }
+            backdrop.style.animation = 'one-eighty-fade-out 0.2s ease-in forwards';
+
+            setTimeout(function() {
+              if (root.parentNode) root.remove();
+            }, 250);
+
+            if (dataResult) {
+              handle180Success(dataResult);
+              resolve(JSON.stringify(dataResult));
+            } else {
+              resolve(JSON.stringify({ cancelled: true }));
+            }
+          }
+
+          // Close button click
+          closeBtn.onclick = function(e) {
+            e.stopPropagation();
+            closeSheet(null, true, 'close_button_clicked');
+          };
+
+          // Backdrop click - protected with 800ms grace period to avoid capturing the button tap!
+          backdrop.onclick = function(e) {
+            var elapsed = Date.now() - openTime;
+            if (elapsed < 800) {
+              console.log('[180 Bottom Sheet] Ignored backdrop click within initial grace period (elapsed ' + elapsed + 'ms).');
+              return;
+            }
+            closeSheet(null, true, 'backdrop_clicked_after_' + elapsed + 'ms');
+          };
+
+          function onKey(e) {
+            if (e.key === 'Escape') closeSheet(null, true, 'escape_key_pressed');
+          }
+
+          function onMsg(event) {
+            console.log('[180 Bottom Sheet onMsg received]', event.origin, event.data);
+            var d = event.data;
+            if (!d) return;
+            if (typeof d === 'string') {
+              try { d = JSON.parse(d); } catch (_) { return; }
+            }
+            if (d && (d.type === '180_IDENTITY_SUCCESS' || d.type === '180_AUTH_SUCCESS')) {
+              closeSheet(d, false, 'auth_success_event');
+            } else if (d && (d.type === '180_IDENTITY_CLOSE' || d.type === '180_MODAL_CLOSE')) {
+              var msgElapsed = Date.now() - openTime;
+              if (msgElapsed > 2000) {
+                closeSheet(null, true, 'close_message_event_' + d.type);
+              } else {
+                console.log('[180 Bottom Sheet] Ignored close message received too early (' + msgElapsed + 'ms).');
+              }
+            }
+          }
+
+          window.addEventListener('message', onMsg);
+          window.addEventListener('keydown', onKey);
+
+          // Append to DOM and animate slide up
+          document.body.appendChild(root);
+          if (isMobile) {
+            requestAnimationFrame(function() {
+              requestAnimationFrame(function() {
+                card.style.transform = 'translateY(0)';
+              });
+            });
+          }
+          console.log('[180 Bottom Sheet] Appended modal root to document.body and animated slide-up');
+
         } catch (e) {
-          console.warn('180 SDK launch error:', e);
+          console.warn('[180 Bottom Sheet Launcher Error]', e);
+          resolve(JSON.stringify({ cancelled: true }));
         }
-        resolve('');
       });
     };
   </script>

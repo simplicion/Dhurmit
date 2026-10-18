@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/auth_state.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/one_eighty_auth_button.dart';
@@ -43,6 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
         try {
           final data = jsonDecode(authResultJson) as Map<String, dynamic>;
+          if (data['cancelled'] == true) {
+            // User intentionally closed the bottom sheet modal
+            return;
+          }
           authCode = (data['code'] ?? data['token'] ?? data['accessToken'] ?? data['authToken'])?.toString();
           if (data['user'] is Map<String, dynamic>) {
             userPayload = data['user'] as Map<String, dynamic>;
@@ -62,17 +65,6 @@ class _LoginScreenState extends State<LoginScreen> {
           }
           return;
         }
-      }
-
-      // 2. Direct OAuth redirect fallback
-      final ssoUrl = Uri.parse(
-        'https://auth.180workspace.com/auth/login?client_id=$clientId&redirect_uri=${Uri.encodeComponent(redirectUri)}&response_type=code&scope=openid%20identity:read%20identity:email%20identity:phone&ux_mode=bottom_sheet',
-      );
-
-      if (await canLaunchUrl(ssoUrl)) {
-        await launchUrl(ssoUrl, mode: LaunchMode.externalApplication);
-      } else {
-        throw Exception('Could not launch 180 Sovereign Sign-In');
       }
     } catch (e) {
       if (!mounted) return;
