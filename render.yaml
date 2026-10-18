@@ -13,11 +13,10 @@ services:
     name: dhurmit-api
     runtime: node
     plan: free
-    region: oregon
+    region: ohio
     rootDir: apps/api
     buildCommand: npm install && npm run build
-    preDeployCommand: npm run migrate
-    startCommand: npm run start
+    startCommand: npm run start:prod
     healthCheckPath: /health
     autoDeploy: true
     envVars:
@@ -63,6 +62,6 @@ services:
 databases:
   - name: dhurmit-postgres
     plan: free
-    region: oregon
+    region: ohio
     databaseName: dhurmit_production
     user: dhurmit_user

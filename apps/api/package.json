@@ -8,11 +8,13 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
+    "start:prod": "node dist/infrastructure/postgres/migrator.js && node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
     "migrate": "tsx src/infrastructure/postgres/migrator.ts up",
+    "migrate:prod": "node dist/infrastructure/postgres/migrator.js",
     "migrate:down": "tsx src/infrastructure/postgres/migrator.ts down",
     "seed": "tsx src/infrastructure/postgres/seed.ts"
   },
@@ -24,6 +26,8 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3",
     "uuid": "^11.0.5",
     "zod": "^3.24.2"
   },
@@ -37,8 +41,6 @@
     "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",
     "supertest": "^7.0.0",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   }
 }
