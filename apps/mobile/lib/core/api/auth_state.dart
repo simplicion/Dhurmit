@@ -25,7 +25,9 @@ class AuthState extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance().timeout(
+        const Duration(seconds: 2),
+      );
       final token = prefs.getString('auth_token');
       final userStr = prefs.getString('user_data');
       final wsStr = prefs.getString('workspace_data');

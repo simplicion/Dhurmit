@@ -20,7 +20,9 @@ class CountryProvider extends ChangeNotifier {
 
   Future<void> _init() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance().timeout(
+        const Duration(seconds: 2),
+      );
       final savedCode = prefs.getString('selected_country_code');
       if (savedCode != null && savedCode.isNotEmpty) {
         _activeCountry = CountryProfile.findByCode(savedCode);

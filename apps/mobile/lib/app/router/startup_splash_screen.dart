@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../core/api/auth_state.dart';
 import '../../core/theme/app_color_tokens.dart';
 import '../../core/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -6,8 +9,41 @@ import 'package:provider/provider.dart';
 /// Instant startup splash screen displayed on Frame 1 while AuthState loads.
 /// Ensures Android OS native splash screen dismisses instantly and provides
 /// a smooth, branded transition to either /home or /login.
-class StartupSplashScreen extends StatelessWidget {
+class StartupSplashScreen extends StatefulWidget {
   const StartupSplashScreen({super.key});
+
+  @override
+  State<StartupSplashScreen> createState() => _StartupSplashScreenState();
+}
+
+class _StartupSplashScreenState extends State<StartupSplashScreen> {
+  Timer? _watchdogTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _watchdogTimer = Timer(const Duration(milliseconds: 1200), () {
+        if (!mounted) return;
+        try {
+          final auth = context.read<AuthState>();
+          if (auth.isAuthenticated) {
+            context.go('/home');
+          } else {
+            context.go('/login');
+          }
+        } catch (_) {
+          // If AuthState is not mounted yet, DhurmitAppBootstrap will swap to CommitteeLedgerApp shortly
+        }
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _watchdogTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

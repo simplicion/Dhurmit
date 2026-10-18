@@ -80,11 +80,7 @@ class _DhurmitAppBootstrapState extends State<DhurmitAppBootstrap> {
     } catch (e, stack) {
       debugPrint('[BOOTSTRAP INIT ERROR] $e\n$stack');
       _authState = AuthState(apiClient: _apiClient);
-      try {
-        _cacheStore = await OfflineCacheStore.initialize();
-      } catch (_) {
-        // Fallback or ignore in worst-case scenario
-      }
+      _cacheStore = OfflineCacheStore.fallback();
       _syncEngine = SyncEngine(apiClient: _apiClient, cacheStore: _cacheStore);
     } finally {
       if (mounted) {
