@@ -77,7 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         // Mobile platform (Android / iOS):
-        // Launch official 180 Sovereign Identity SSO in browser
+        // Launch official 180 Sovereign Identity SSO in In-App Browser / Custom Tab
         const mobileRedirectUri = 'https://dhurmit.simplicion.com/auth/callback';
         final authUrl = Uri.parse(
           'https://auth.180workspace.com/auth/login?'
@@ -85,19 +85,43 @@ class _LoginScreenState extends State<LoginScreen> {
           'redirect_uri=${Uri.encodeComponent(mobileRedirectUri)}&'
           'response_type=code&'
           'scope=${Uri.encodeComponent('openid identity:read identity:email identity:phone')}&'
+          'ux_mode=bottom_sheet&'
+          'env=production&'
           'app=auth',
         );
 
-        if (await canLaunchUrl(authUrl)) {
-          await launchUrl(authUrl, mode: LaunchMode.externalApplication);
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Cannot launch browser. Please verify internet connection and browser availability.'),
-              ),
+        bool launched = false;
+        try {
+          launched = await launchUrl(
+            authUrl,
+            mode: LaunchMode.inAppBrowserView,
+          );
+        } catch (_) {}
+
+        if (!launched) {
+          try {
+            launched = await launchUrl(
+              authUrl,
+              mode: LaunchMode.externalApplication,
             );
-          }
+          } catch (_) {}
+        }
+
+        if (!launched) {
+          try {
+            launched = await launchUrl(
+              authUrl,
+              mode: LaunchMode.platformDefault,
+            );
+          } catch (_) {}
+        }
+
+        if (!launched && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Cannot launch 180 Identity. Please verify internet connection.'),
+            ),
+          );
         }
       }
     } catch (e) {
