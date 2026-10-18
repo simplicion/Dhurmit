@@ -27,7 +27,7 @@ class ApiClient {
   static String get defaultBaseUrl {
     const fromEnv = String.fromEnvironment('API_URL');
     if (fromEnv.isNotEmpty) return fromEnv;
-    if (kReleaseMode) return 'https://api.dhurmit.app/api/v1';
+    if (kReleaseMode) return 'https://dhurmit.onrender.com/api/v1';
     if (kIsWeb) return 'http://localhost:4000/api/v1';
     if (Platform.isAndroid) return 'http://10.0.2.2:4000/api/v1';
     return 'http://localhost:4000/api/v1';
