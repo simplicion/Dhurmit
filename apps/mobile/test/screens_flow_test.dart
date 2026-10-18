@@ -207,6 +207,29 @@ void main() {
       expect(find.byType(CalendarScreen), findsOneWidget);
       await tester.pump();
     });
+
+    testWidgets('LoginScreen displays Work Offline button and tapping it activates offline organizer session', (tester) async {
+      final auth = AuthState(apiClient: ApiClient(baseUrl: 'http://localhost:4000/api/v1'));
+      await auth.checkAuth();
+
+      await tester.pumpWidget(wrapAppShell(
+        const LoginScreen(),
+        authState: auth,
+        syncEngine: syncEngine,
+        cacheStore: cacheStore,
+      ));
+
+      final offlineBtn = find.text('Work Offline (No Internet Required)');
+      expect(offlineBtn, findsOneWidget);
+
+      await tester.ensureVisible(offlineBtn);
+      await tester.tap(offlineBtn);
+      await tester.pump();
+
+      expect(auth.isAuthenticated, isTrue);
+      expect(auth.isOrganizer, isTrue);
+      expect(auth.activeWorkspace?['id'], equals('offline_workspace'));
+    });
   });
 }
 

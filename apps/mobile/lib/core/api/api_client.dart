@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
@@ -21,6 +22,8 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
+  static const Duration requestTimeout = Duration(seconds: 5);
+
   static String get defaultBaseUrl {
     const fromEnv = String.fromEnvironment('API_URL');
     if (fromEnv.isNotEmpty) return fromEnv;
@@ -58,38 +61,126 @@ class ApiClient {
   }
 
   Future<dynamic> get(String path) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final response = await _client.get(uri, headers: _buildHeaders());
-    return _handleResponse(response);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final response = await _client
+          .get(uri, headers: _buildHeaders())
+          .timeout(requestTimeout);
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw ApiException(
+        code: 'TIMEOUT',
+        message: 'Network request timed out. Dhurmit is running in offline-first mode.',
+        statusCode: 408,
+      );
+    } on SocketException {
+      throw ApiException(
+        code: 'OFFLINE',
+        message: 'Network unreachable. Dhurmit is running in offline-first mode.',
+        statusCode: 503,
+      );
+    } on http.ClientException catch (e) {
+      throw ApiException(
+        code: 'CONNECTION_FAILED',
+        message: e.message,
+        statusCode: 503,
+      );
+    }
   }
 
   Future<dynamic> post(String path, {Map<String, dynamic>? body, String? idempotencyKey}) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final response = await _client.post(
-      uri,
-      headers: _buildHeaders(idempotencyKey: idempotencyKey),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    return _handleResponse(response);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final response = await _client
+          .post(
+            uri,
+            headers: _buildHeaders(idempotencyKey: idempotencyKey),
+            body: body != null ? jsonEncode(body) : null,
+          )
+          .timeout(requestTimeout);
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw ApiException(
+        code: 'TIMEOUT',
+        message: 'Network request timed out. Dhurmit is running in offline-first mode.',
+        statusCode: 408,
+      );
+    } on SocketException {
+      throw ApiException(
+        code: 'OFFLINE',
+        message: 'Network unreachable. Changes have been queued in offline outbox.',
+        statusCode: 503,
+      );
+    } on http.ClientException catch (e) {
+      throw ApiException(
+        code: 'CONNECTION_FAILED',
+        message: e.message,
+        statusCode: 503,
+      );
+    }
   }
 
   Future<dynamic> patch(String path, {Map<String, dynamic>? body}) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final response = await _client.patch(
-      uri,
-      headers: _buildHeaders(),
-      body: body != null ? jsonEncode(body) : null,
-    );
-    return _handleResponse(response);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final response = await _client
+          .patch(
+            uri,
+            headers: _buildHeaders(),
+            body: body != null ? jsonEncode(body) : null,
+          )
+          .timeout(requestTimeout);
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw ApiException(
+        code: 'TIMEOUT',
+        message: 'Network request timed out. Dhurmit is running in offline-first mode.',
+        statusCode: 408,
+      );
+    } on SocketException {
+      throw ApiException(
+        code: 'OFFLINE',
+        message: 'Network unreachable. Changes have been queued in offline outbox.',
+        statusCode: 503,
+      );
+    } on http.ClientException catch (e) {
+      throw ApiException(
+        code: 'CONNECTION_FAILED',
+        message: e.message,
+        statusCode: 503,
+      );
+    }
   }
 
   Future<dynamic> delete(String path, {String? idempotencyKey}) async {
-    final uri = Uri.parse('$baseUrl$path');
-    final response = await _client.delete(
-      uri,
-      headers: _buildHeaders(idempotencyKey: idempotencyKey),
-    );
-    return _handleResponse(response);
+    try {
+      final uri = Uri.parse('$baseUrl$path');
+      final response = await _client
+          .delete(
+            uri,
+            headers: _buildHeaders(idempotencyKey: idempotencyKey),
+          )
+          .timeout(requestTimeout);
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw ApiException(
+        code: 'TIMEOUT',
+        message: 'Network request timed out. Dhurmit is running in offline-first mode.',
+        statusCode: 408,
+      );
+    } on SocketException {
+      throw ApiException(
+        code: 'OFFLINE',
+        message: 'Network unreachable. Dhurmit is running in offline-first mode.',
+        statusCode: 503,
+      );
+    } on http.ClientException catch (e) {
+      throw ApiException(
+        code: 'CONNECTION_FAILED',
+        message: e.message,
+        statusCode: 503,
+      );
+    }
   }
 
   dynamic _handleResponse(http.Response response) {

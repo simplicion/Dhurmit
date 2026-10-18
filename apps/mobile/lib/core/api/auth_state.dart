@@ -63,6 +63,33 @@ class AuthState extends ChangeNotifier {
     }
   }
 
+  /// Enables 100% offline usage immediately without requiring any internet connection.
+  Future<void> enterOfflineMode() async {
+    _user = {
+      'id': 'offline_organizer',
+      'displayName': 'Organizer (Offline)',
+      'email': 'organizer@offline.dhurmit',
+      'userType': 'ORGANIZER',
+    };
+    _activeWorkspace = {
+      'id': 'offline_workspace',
+      'name': 'Local Committee Ledger',
+      'role': 'OWNER',
+    };
+    apiClient.authToken = 'offline_session_active';
+    apiClient.workspaceId = 'offline_workspace';
+    _isAuthenticated = true;
+    _isLoading = false;
+    notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('auth_token', 'offline_session_active');
+      await prefs.setString('user_data', jsonEncode(_user));
+      await prefs.setString('workspace_data', jsonEncode(_activeWorkspace));
+    } catch (_) {}
+  }
+
   Future<void> register(String displayName, String email, String password, {String? phone, String userType = 'ORGANIZER'}) async {
     final res = await apiClient.post('/auth/register', body: {
       'displayName': displayName,

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/auth_state.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/one_eighty_auth_button.dart';
@@ -16,6 +18,7 @@ import 'member_login_bottom_sheet.dart';
 /// - Dynamic Country selector (OpenStreetMap)
 /// - Official 180 Identity SSO Button for Committee Organizers
 /// - Direct "Join as a Member" button opening MemberLoginBottomSheet
+/// - Instant "Continue in Offline Mode" for 100% offline usage
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -30,51 +33,78 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       const clientId = '180_client_3b759b500c4b8a04f888ec3d91a82bd3';
-      final origin = Uri.base.origin.contains('http')
-          ? Uri.base.origin
-          : 'http://localhost:3000';
-      final redirectUri = '$origin/auth/callback';
 
-      // Launch 180 SDK native bottom sheet modal on Web
-      final authResultJson = await trigger180WebBottomSheet(clientId, redirectUri);
-      if (!mounted) return;
+      if (kIsWeb) {
+        final origin = Uri.base.origin.contains('http')
+            ? Uri.base.origin
+            : 'http://localhost:3000';
+        final redirectUri = '$origin/auth/callback';
 
-      if (authResultJson != null && authResultJson.isNotEmpty) {
-        final authState = context.read<AuthState>();
-        String? authCode;
-        Map<String, dynamic>? userPayload;
+        // Launch 180 SDK native bottom sheet modal on Web
+        final authResultJson = await trigger180WebBottomSheet(clientId, redirectUri);
+        if (!mounted) return;
 
-        try {
-          final data = jsonDecode(authResultJson) as Map<String, dynamic>;
-          if (data['cancelled'] == true) {
+        if (authResultJson != null && authResultJson.isNotEmpty) {
+          final authState = context.read<AuthState>();
+          String? authCode;
+          Map<String, dynamic>? userPayload;
+
+          try {
+            final data = jsonDecode(authResultJson) as Map<String, dynamic>;
+            if (data['cancelled'] == true) {
+              return;
+            }
+            authCode = (data['code'] ?? data['token'] ?? data['accessToken'] ?? data['authToken'])?.toString();
+            if (data['user'] is Map<String, dynamic>) {
+              userPayload = data['user'] as Map<String, dynamic>;
+            }
+          } catch (_) {
+            authCode = authResultJson;
+          }
+
+          if ((authCode != null && authCode.isNotEmpty) || userPayload != null) {
+            await authState.loginWith180(
+              authCode ?? '180_session_verified',
+              user: userPayload,
+              redirectUri: redirectUri,
+              userType: 'ORGANIZER',
+            );
+            if (mounted) {
+              context.go('/home');
+            }
             return;
           }
-          authCode = (data['code'] ?? data['token'] ?? data['accessToken'] ?? data['authToken'])?.toString();
-          if (data['user'] is Map<String, dynamic>) {
-            userPayload = data['user'] as Map<String, dynamic>;
-          }
-        } catch (_) {
-          authCode = authResultJson;
         }
+      } else {
+        // Mobile platform (Android / iOS):
+        // Launch official 180 Sovereign Identity SSO in browser
+        const mobileRedirectUri = 'https://dhurmit.simplicion.com/auth/callback';
+        final authUrl = Uri.parse(
+          'https://auth.180workspace.com/auth/login?'
+          'client_id=$clientId&'
+          'redirect_uri=${Uri.encodeComponent(mobileRedirectUri)}&'
+          'response_type=code&'
+          'scope=${Uri.encodeComponent('openid identity:read identity:email identity:phone')}&'
+          'app=auth',
+        );
 
-        if ((authCode != null && authCode.isNotEmpty) || userPayload != null) {
-          await authState.loginWith180(
-            authCode ?? '180_session_verified',
-            user: userPayload,
-            redirectUri: redirectUri,
-            userType: 'ORGANIZER',
-          );
+        if (await canLaunchUrl(authUrl)) {
+          await launchUrl(authUrl, mode: LaunchMode.externalApplication);
+        } else {
           if (mounted) {
-            context.go('/home');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Cannot launch browser. You can use "Continue in Offline Mode" below.'),
+              ),
+            );
           }
-          return;
         }
       }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to complete 180 Identity sign-in: $e'),
+          content: Text('180 Identity notice: $e'),
           backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
@@ -241,6 +271,34 @@ class _LoginScreenState extends State<LoginScreen> {
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.3,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // ─── INSTANT OFFLINE LEDGER MODE (Zero Internet Required) ───
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      foregroundColor: tokens.onSurfaceVariant,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                    ),
+                    onPressed: () async {
+                      final authState = context.read<AuthState>();
+                      await authState.enterOfflineMode();
+                      if (!context.mounted) return;
+                      try {
+                        context.go('/home');
+                      } catch (_) {
+                        // Fallback when rendered without GoRouter in isolated tests
+                      }
+                    },
+                    icon: const Icon(Icons.cloud_off_rounded, size: 18),
+                    label: const Text(
+                      'Work Offline (No Internet Required)',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),

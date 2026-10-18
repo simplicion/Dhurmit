@@ -7,6 +7,7 @@ import '../../../core/money/app_money.dart';
 import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/state_widgets.dart';
+import '../../../core/sync/offline_cache_store.dart';
 import 'widgets/join_committee_bottom_sheet.dart';
 
 class CommitteeListScreen extends StatefulWidget {
@@ -28,26 +29,61 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
   }
 
   Future<void> _fetchCommittees() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
+    final authState = context.read<AuthState>();
+    final cacheStore = context.read<OfflineCacheStore>();
+    final wsId = authState.activeWorkspace?['id']?.toString() ?? 'default';
 
-    try {
-      final client = context.read<AuthState>().apiClient;
-      final res = await client.get('/committees');
+    // 1. Immediately render cached data if available (zero waiting time)
+    final cached = cacheStore.getCachedCommittees(wsId);
+    if (cached.isNotEmpty && mounted) {
+      setState(() {
+        _committees = cached;
+        _isLoading = false;
+        _error = null;
+      });
+    } else {
       if (mounted) {
         setState(() {
-          _committees = res is List ? res : [];
-          _isLoading = false;
+          _isLoading = true;
+          _error = null;
         });
+      }
+    }
+
+    // 2. Fetch fresh updates in background if authenticated
+    try {
+      final client = authState.apiClient;
+      if (authState.isAuthenticated && client.authToken != null && client.authToken != 'offline_session_active') {
+        final res = await client.get('/committees');
+        if (mounted) {
+          final list = res is List ? res : <dynamic>[];
+          setState(() {
+            _committees = list;
+            _isLoading = false;
+            _error = null;
+          });
+          await cacheStore.cacheCommittees(wsId, list.cast<Map<String, dynamic>>());
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
     } catch (e) {
       if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _isLoading = false;
-        });
+        if (_committees.isNotEmpty) {
+          // Keep showing cached data silently without disrupting user
+          setState(() {
+            _isLoading = false;
+          });
+        } else {
+          setState(() {
+            _error = e.toString();
+            _isLoading = false;
+          });
+        }
       }
     }
   }

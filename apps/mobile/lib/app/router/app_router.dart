@@ -10,15 +10,21 @@ import '../../features/members/presentation/member_statement_screen.dart';
 import '../../features/reports/presentation/reports_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 
+import 'startup_splash_screen.dart';
+
 GoRouter createRouter(AuthState authState) {
   return GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/',
     refreshListenable: authState,
     redirect: (BuildContext context, GoRouterState state) {
-      if (authState.isLoading) return null;
+      // While initial AuthState is loading from local storage, keep user on StartupSplashScreen
+      if (authState.isLoading) {
+        return state.matchedLocation == '/' ? null : '/';
+      }
 
       final isLoggingIn = state.matchedLocation == '/login';
       final isCallback = state.matchedLocation == '/auth/callback';
+      final isSplash = state.matchedLocation == '/';
       final isLoggedIn = authState.isAuthenticated;
       final authCode = state.uri.queryParameters['code'];
 
@@ -28,7 +34,7 @@ GoRouter createRouter(AuthState authState) {
         return '/auth/callback?code=$authCode';
       }
 
-      if (state.matchedLocation == '/' || state.matchedLocation.isEmpty) {
+      if (isSplash) {
         return isLoggedIn ? '/home' : '/login';
       }
 
@@ -46,7 +52,7 @@ GoRouter createRouter(AuthState authState) {
     routes: [
       GoRoute(
         path: '/',
-        redirect: (context, state) => authState.isAuthenticated ? '/home' : '/login',
+        builder: (context, state) => const StartupSplashScreen(),
       ),
       GoRoute(
         path: '/login',
