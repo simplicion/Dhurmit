@@ -8,6 +8,7 @@ import 'package:committee_ledger_mobile/core/api/auth_state.dart';
 import 'package:committee_ledger_mobile/core/sync/offline_cache_store.dart';
 import 'package:committee_ledger_mobile/core/sync/sync_engine.dart';
 import 'package:committee_ledger_mobile/core/location/country_provider.dart';
+import 'package:committee_ledger_mobile/app/router/startup_splash_screen.dart';
 
 void main() {
   testWidgets('CommitteeLedgerApp initializes without error', (WidgetTester tester) async {
@@ -34,6 +35,14 @@ void main() {
       ),
     );
 
+    expect(find.byType(CommitteeLedgerApp), findsOneWidget);
+  });
+
+  testWidgets('DhurmitAppBootstrap boots and renders Frame 1 splash instantly', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    await tester.pumpWidget(const DhurmitAppBootstrap());
+    expect(find.byType(StartupSplashScreen), findsOneWidget);
+    await tester.pumpAndSettle();
     expect(find.byType(CommitteeLedgerApp), findsOneWidget);
   });
 }

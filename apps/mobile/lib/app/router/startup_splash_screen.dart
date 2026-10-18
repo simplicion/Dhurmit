@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme/app_color_tokens.dart';
 import '../../core/theme/theme_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -10,7 +11,13 @@ class StartupSplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tokens = context.watch<ThemeProvider>().tokens;
+    AppColorTokens tokens = const BlueColorTokens();
+    try {
+      final themeProvider = Provider.of<ThemeProvider>(context, listen: true);
+      tokens = themeProvider.tokens;
+    } catch (_) {
+      tokens = const BlueColorTokens();
+    }
 
     return Scaffold(
       backgroundColor: tokens.background,
