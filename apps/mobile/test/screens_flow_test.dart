@@ -11,6 +11,7 @@ import 'package:committee_ledger_mobile/core/sync/sync_engine.dart';
 import 'package:committee_ledger_mobile/features/settings/presentation/settings_screen.dart';
 import 'package:committee_ledger_mobile/features/authentication/presentation/login_screen.dart';
 import 'package:committee_ledger_mobile/features/home/presentation/home_dashboard_screen.dart';
+import 'package:committee_ledger_mobile/features/calendar/presentation/calendar_screen.dart';
 
 Widget wrapAppShell(
   Widget child, {
@@ -130,7 +131,7 @@ void main() {
       expect(find.text('Offline Sync & Storage'), findsOneWidget);
       expect(find.text('Queued Changes: 0'), findsOneWidget);
 
-      await tester.drag(find.byType(ListView), const Offset(0, -400));
+      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -400));
       await tester.pumpAndSettle();
 
       expect(find.text('Legal & Operational Notice'), findsOneWidget);
@@ -180,6 +181,17 @@ void main() {
       expect(find.text('Dhurmit Leader'), findsOneWidget);
       expect(find.text('Kathmandu Committee'), findsOneWidget);
       expect(find.text('App Theme'), findsOneWidget);
+    });
+
+    testWidgets('CalendarScreen renders loading and empty state gracefully without layout error', (tester) async {
+      await tester.pumpWidget(wrapAppShell(
+        const CalendarScreen(committeeId: 'mock_comm_1'),
+        syncEngine: syncEngine,
+        cacheStore: cacheStore,
+      ));
+
+      expect(find.byType(CalendarScreen), findsOneWidget);
+      await tester.pump();
     });
   });
 }

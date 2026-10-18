@@ -13,11 +13,13 @@ import '../../../core/sync/offline_cache_store.dart';
 
 class RecordCollectionBottomSheet extends StatefulWidget {
   final String committeeId;
+  final String? initialMemberId;
   final VoidCallback onSuccess;
 
   const RecordCollectionBottomSheet({
     super.key,
     required this.committeeId,
+    this.initialMemberId,
     required this.onSuccess,
   });
 
@@ -46,8 +48,12 @@ class _RecordCollectionBottomSheetState extends State<RecordCollectionBottomShee
   @override
   void initState() {
     super.initState();
+    _selectedMemberId = widget.initialMemberId;
     _idempotencyKey = 'idem_${DateTime.now().millisecondsSinceEpoch}_${widget.committeeId.substring(0, 8)}';
     _fetchMembers();
+    if (widget.initialMemberId != null) {
+      _fetchMemberStatement(widget.initialMemberId!);
+    }
   }
 
   @override
