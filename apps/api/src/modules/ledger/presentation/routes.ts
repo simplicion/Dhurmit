@@ -62,9 +62,8 @@ ledgerRouter.post(
   asyncHandler(async (req: Request, res: Response) => {
     const committeeId = req.params['committeeId'] || '';
     const userId = req.user!.userId;
-    const committee = await getAuthorizedCommittee(committeeId, userId, ['OWNER', 'ADMIN', 'COLLECTOR']);
-
     const body = recordCollectionSchema.parse(req.body);
+    const committee = await getAuthorizedCommittee(committeeId, userId, ['OWNER', 'ADMIN', 'COLLECTOR']);
     const idempotencyKey = (req.headers['idempotency-key'] as string) || (req.headers['x-idempotency-key'] as string);
 
     const requestPayloadString = JSON.stringify({
@@ -103,6 +102,15 @@ ledgerRouter.post(
         throw new DomainError('VALIDATION_ERROR', 'Member is not enrolled in this committee');
       }
 
+      // Lock member obligations to prevent concurrent race conditions
+      await client.query(
+        `SELECT id FROM obligations
+         WHERE committee_id = $1 AND member_id = $2
+         ORDER BY due_date ASC
+         FOR UPDATE`,
+        [committeeId, body.memberId]
+      );
+
       const openObligationsRes = await client.query(
         `SELECT o.id, o.due_date, o.due_amount_minor, o.currency_code,
                 COALESCE(SUM(ca.amount_minor), 0) as already_allocated_minor
@@ -111,8 +119,7 @@ ledgerRouter.post(
          LEFT JOIN collections c ON c.id = ca.collection_id AND c.reversal_status = 'ACTIVE'
          WHERE o.committee_id = $1 AND o.member_id = $2
          GROUP BY o.id, o.due_date, o.due_amount_minor, o.currency_code
-         ORDER BY o.due_date ASC
-         FOR UPDATE OF o`,
+         ORDER BY o.due_date ASC`,
         [committeeId, body.memberId]
       );
 
@@ -199,43 +206,46 @@ ledgerRouter.post(
         ]
       );
 
-      const updatedObligationsRes = await client.query(
-        `SELECT o.id, o.due_date, o.due_amount_minor,
-                json_agg(
-                  json_build_object(
-                    'amountMinor', ca.amount_minor,
-                    'receivedAt', c.received_at
-                  )
-                ) FILTER (WHERE ca.id IS NOT NULL) as allocations_json
-         FROM obligations o
-         LEFT JOIN collection_allocations ca ON ca.obligation_id = o.id
-         LEFT JOIN collections c ON c.id = ca.collection_id AND c.reversal_status = 'ACTIVE'
-         WHERE o.id = ANY($1)
-         GROUP BY o.id, o.due_date, o.due_amount_minor`,
-        [finalAllocations.map((a) => a.obligationId)]
-      );
+      let updatedObligations: any[] = [];
+      if (finalAllocations.length > 0) {
+        const updatedObligationsRes = await client.query(
+          `SELECT o.id, o.due_date, o.due_amount_minor,
+                  json_agg(
+                    json_build_object(
+                      'amountMinor', ca.amount_minor,
+                      'receivedAt', c.received_at
+                    )
+                  ) FILTER (WHERE ca.id IS NOT NULL) as allocations_json
+           FROM obligations o
+           LEFT JOIN collection_allocations ca ON ca.obligation_id = o.id
+           LEFT JOIN collections c ON c.id = ca.collection_id AND c.reversal_status = 'ACTIVE'
+           WHERE o.id = ANY($1::uuid[])
+           GROUP BY o.id, o.due_date, o.due_amount_minor`,
+          [finalAllocations.map((a) => a.obligationId)]
+        );
 
-      const updatedObligations = updatedObligationsRes.rows.map((row: any) => {
-        const dueDateStr = row.due_date instanceof Date ? row.due_date.toISOString().split('T')[0] : String(row.due_date);
-        const allocs = (row.allocations_json || []).map((a: any) => ({
-          amountMinor: BigInt(a.amountMinor),
-          receivedAt: a.receivedAt,
-        }));
-        const state = StatusCalculator.calculate({
-          dueDate: dueDateStr,
-          dueAmountMinor: BigInt(row.due_amount_minor),
-          allocations: allocs,
+        updatedObligations = updatedObligationsRes.rows.map((row: any) => {
+          const dueDateStr = row.due_date instanceof Date ? row.due_date.toISOString().split('T')[0] : String(row.due_date);
+          const allocs = (row.allocations_json || []).map((a: any) => ({
+            amountMinor: BigInt(a.amountMinor),
+            receivedAt: a.receivedAt,
+          }));
+          const state = StatusCalculator.calculate({
+            dueDate: dueDateStr,
+            dueAmountMinor: BigInt(row.due_amount_minor),
+            allocations: allocs,
+          });
+
+          return {
+            obligationId: row.id,
+            dueDate: dueDateStr,
+            dueAmountMinor: state.dueAmountMinor.toString(),
+            allocatedAmountMinor: state.allocatedAmountMinor.toString(),
+            outstandingAmountMinor: state.outstandingAmountMinor.toString(),
+            status: state.status,
+          };
         });
-
-        return {
-          obligationId: row.id,
-          dueDate: dueDateStr,
-          dueAmountMinor: state.dueAmountMinor.toString(),
-          allocatedAmountMinor: state.allocatedAmountMinor.toString(),
-          outstandingAmountMinor: state.outstandingAmountMinor.toString(),
-          status: state.status,
-        };
-      });
+      }
 
       const responsePayload = {
         data: {
@@ -261,7 +271,9 @@ ledgerRouter.post(
           `INSERT INTO idempotency_records (
             workspace_id, actor_id, idempotency_key, request_hash,
             response_status, response_body
-          ) VALUES ($1, $2, $3, $4, 201, $5)`,
+          ) VALUES ($1, $2, $3, $4, 201, $5)
+          ON CONFLICT (workspace_id, actor_id, idempotency_key) DO UPDATE
+          SET response_body = EXCLUDED.response_body`,
           [
             committee.workspace_id,
             userId,

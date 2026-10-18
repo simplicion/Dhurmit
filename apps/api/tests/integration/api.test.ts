@@ -160,4 +160,39 @@ describe('API Foundation, Health & Security Integration Tests', () => {
       expect(res.status).toBe(401);
     });
   });
+
+  describe('Ledger Collection Recording Endpoints', () => {
+    it('rejects POST /api/v1/committees/:id/collections without auth header', async () => {
+      const res = await request(app)
+        .post('/api/v1/committees/00000000-0000-0000-0000-000000000000/collections')
+        .send({
+          memberId: '00000000-0000-0000-0000-000000000001',
+          amountMinor: 200000,
+          receivedAt: new Date().toISOString(),
+        });
+      expect(res.status).toBe(401);
+      expect(res.body.error.code).toBe('UNAUTHENTICATED');
+    });
+
+    it('rejects POST /api/v1/committees/:id/collections with negative or zero amount', async () => {
+      // Create mock token with generateAccessToken
+      const { generateAccessToken } = await import('../../src/shared/presentation/middlewares/auth.middleware.js');
+      const token = generateAccessToken({
+        userId: '00000000-0000-0000-0000-000000000000',
+        email: 'test@example.com',
+        workspaceId: '00000000-0000-0000-0000-000000000001',
+      });
+
+      const res = await request(app)
+        .post('/api/v1/committees/00000000-0000-0000-0000-000000000000/collections')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          memberId: '00000000-0000-0000-0000-000000000002',
+          amountMinor: -500,
+          receivedAt: new Date().toISOString(),
+        });
+      expect(res.status).toBe(400);
+      expect(res.body.error.code).toBe('VALIDATION_ERROR');
+    });
+  });
 });
