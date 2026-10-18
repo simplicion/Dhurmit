@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../api/auth_state.dart';
 import '../theme/theme_provider.dart';
 
 typedef EmptyState = EmptyStateWidget;
@@ -164,6 +165,25 @@ class ErrorStateWidget extends StatelessWidget {
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text('Retry'),
+              ),
+            ],
+            if (message.toUpperCase().contains('UNAUTHENTICATED') ||
+                message.contains('401') ||
+                message.toLowerCase().contains('expired')) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: tokens.unpaidOverdue,
+                  side: BorderSide(color: tokens.unpaidOverdue.withValues(alpha: 0.5)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () async {
+                  await context.read<AuthState>().logout();
+                },
+                icon: const Icon(Icons.logout_rounded, size: 18),
+                label: const Text('Sign In Again'),
               ),
             ],
           ],
