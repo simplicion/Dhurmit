@@ -5,12 +5,21 @@ import { logger } from '../logger.js';
 
 const { Pool } = pg;
 
+const requiresSsl =
+  process.env['DATABASE_SSL'] === 'true' ||
+  env.DATABASE_URL.includes('sslmode=require') ||
+  env.DATABASE_URL.includes('render.com') ||
+  env.DATABASE_URL.includes('neon.tech') ||
+  env.DATABASE_URL.includes('supabase.co') ||
+  env.DATABASE_URL.includes('amazonaws.com');
+
 export const pool = new Pool({
   connectionString: env.DATABASE_URL,
   min: env.DATABASE_POOL_MIN,
   max: env.DATABASE_POOL_MAX,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000,
+  ssl: requiresSsl ? { rejectUnauthorized: false } : undefined,
 });
 
 pool.on('error', (err) => {
