@@ -82,7 +82,7 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            Expanded(
+            Flexible(
               child: Text(
                 workspaceName,
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19),

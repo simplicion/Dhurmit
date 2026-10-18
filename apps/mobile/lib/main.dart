@@ -13,6 +13,36 @@ import 'core/sync/sync_engine.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('[FLUTTER ERROR CAUGHT] ${details.exceptionAsString()}\n${details.stack}');
+  };
+
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Material(
+      color: Colors.white,
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline_rounded, color: Colors.red, size: 40),
+              const SizedBox(height: 8),
+              const Text('Render Error', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+              const SizedBox(height: 8),
+              Text(
+                details.exceptionAsString(),
+                style: const TextStyle(fontSize: 12, color: Colors.black87),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  };
+
   // Base API configuration (can be overridden via --dart-define=API_URL=...)
   final apiClient = ApiClient();
   final authState = AuthState(apiClient: apiClient);

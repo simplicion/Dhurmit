@@ -17,6 +17,13 @@ class SettingsScreen extends StatelessWidget {
     final user = auth.user;
     final workspace = auth.activeWorkspace;
 
+    // Safe extraction of profile values without null assertion operators
+    final rawName = (user?['displayName'] ?? user?['display_name'] ?? user?['name'] ?? user?['email']) as String?;
+    final String displayName = (rawName != null && rawName.trim().isNotEmpty) ? rawName.trim() : 'Signed In Organizer';
+    final String initialLetter = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'U';
+    final String email = (user?['email'] as String?) ?? '';
+    final String workspaceName = (workspace?['name'] as String?) ?? 'Default Workspace';
+
     return Scaffold(
       backgroundColor: tokens.background,
       appBar: AppBar(
@@ -25,9 +32,11 @@ class SettingsScreen extends StatelessWidget {
         foregroundColor: tokens.onSurface,
         elevation: 0,
       ),
-      body: ListView(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
           // Profile & Workspace Card
           Container(
             padding: const EdgeInsets.all(16),
@@ -45,9 +54,7 @@ class SettingsScreen extends StatelessWidget {
                       radius: 24,
                       backgroundColor: tokens.primaryContainer,
                       child: Text(
-                        (user?['displayName'] as String?)?.isNotEmpty == true
-                            ? (user!['displayName'] as String)[0].toUpperCase()
-                            : 'U',
+                        initialLetter,
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -61,20 +68,21 @@ class SettingsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            (user?['displayName'] as String?) ?? 'Signed In Organizer',
+                            displayName,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: tokens.onSurface,
                             ),
                           ),
-                          Text(
-                            (user?['email'] as String?) ?? '',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: tokens.onSurfaceVariant,
+                          if (email.isNotEmpty)
+                            Text(
+                              email,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: tokens.onSurfaceVariant,
+                              ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -90,7 +98,7 @@ class SettingsScreen extends StatelessWidget {
                         style: TextStyle(fontSize: 13, color: tokens.onSurfaceVariant),
                       ),
                       Text(
-                        (workspace['name'] as String?) ?? 'Default Workspace',
+                        workspaceName,
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -371,8 +379,9 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildThemeChoiceCard({
     required BuildContext context,

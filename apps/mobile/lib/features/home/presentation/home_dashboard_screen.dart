@@ -28,18 +28,17 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final tokens = context.watch<ThemeProvider>().tokens;
 
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SyncStatusBanner(),
-            Expanded(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: _screens,
-              ),
+      body: Column(
+        children: [
+          const SyncStatusBanner(),
+          Expanded(
+            child: IndexedStack(
+              sizing: StackFit.expand,
+              index: _currentIndex,
+              children: _screens,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,

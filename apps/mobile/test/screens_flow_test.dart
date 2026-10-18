@@ -10,6 +10,7 @@ import 'package:committee_ledger_mobile/core/sync/offline_cache_store.dart';
 import 'package:committee_ledger_mobile/core/sync/sync_engine.dart';
 import 'package:committee_ledger_mobile/features/settings/presentation/settings_screen.dart';
 import 'package:committee_ledger_mobile/features/authentication/presentation/login_screen.dart';
+import 'package:committee_ledger_mobile/features/home/presentation/home_dashboard_screen.dart';
 
 Widget wrapAppShell(
   Widget child, {
@@ -138,5 +139,49 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('HomeDashboardScreen switches tabs to Settings without layout error', (tester) async {
+      await tester.pumpWidget(wrapAppShell(
+        const HomeDashboardScreen(),
+        syncEngine: syncEngine,
+        cacheStore: cacheStore,
+      ));
+      await tester.pump();
+
+      // Tap on Settings tab
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Settings & Preferences'), findsOneWidget);
+      expect(find.text('App Theme'), findsOneWidget);
+    });
+
+    testWidgets('SettingsScreen renders correctly when user and workspace are authenticated', (tester) async {
+      await prefs.setString('auth_token', 'mock_token_123');
+      await prefs.setString('user_data', '{"id":"user_1","displayName":"Dhurmit Leader","email":"leader@dhurmit.com"}');
+      await prefs.setString('workspace_data', '{"id":"ws_1","name":"Kathmandu Committee","role":"OWNER"}');
+
+      final auth = AuthState(apiClient: ApiClient(baseUrl: 'http://localhost:4000/api/v1'));
+      await auth.checkAuth();
+
+      await tester.pumpWidget(wrapAppShell(
+        const HomeDashboardScreen(),
+        authState: auth,
+        syncEngine: syncEngine,
+        cacheStore: cacheStore,
+      ));
+      await tester.pumpAndSettle();
+
+      // Tap Settings tab
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Settings & Preferences'), findsOneWidget);
+      expect(find.text('Dhurmit Leader'), findsOneWidget);
+      expect(find.text('Kathmandu Committee'), findsOneWidget);
+      expect(find.text('App Theme'), findsOneWidget);
+    });
   });
 }
+
+
