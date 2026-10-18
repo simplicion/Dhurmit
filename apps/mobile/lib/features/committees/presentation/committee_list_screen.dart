@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +7,7 @@ import '../../../core/money/app_money.dart';
 import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/state_widgets.dart';
+import 'widgets/join_committee_bottom_sheet.dart';
 
 class CommitteeListScreen extends StatefulWidget {
   const CommitteeListScreen({super.key});
@@ -50,10 +52,27 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
     }
   }
 
+  void _openJoinCommitteeSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => JoinCommitteeBottomSheet(
+        onJoined: () {
+          _fetchCommittees();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tokens = context.watch<ThemeProvider>().tokens;
-    final String workspaceName = (context.watch<AuthState>().activeWorkspace?['name'] as String?) ?? 'Committees';
+    final authState = context.watch<AuthState>();
+    final bool isMember = authState.isMember;
+    final String workspaceName = (authState.activeWorkspace?['name'] as String?) ?? 'Committees';
 
     return Scaffold(
       appBar: AppBar(
@@ -84,14 +103,19 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
             const SizedBox(width: 10),
             Flexible(
               child: Text(
-                workspaceName,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 19),
+                isMember ? 'Joined Committees' : workspaceName,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.group_add_rounded),
+            tooltip: 'Join Committee with Code',
+            onPressed: _openJoinCommitteeSheet,
+          ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _fetchCommittees,
@@ -101,18 +125,22 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: tokens.primary,
         foregroundColor: tokens.onPrimary,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('New Committee'),
+        icon: Icon(isMember ? Icons.group_add_rounded : Icons.add_rounded),
+        label: Text(isMember ? 'Join Committee' : 'New Committee'),
         onPressed: () async {
-          final res = await context.push('/committees/create');
-          if (res == true) await _fetchCommittees();
+          if (isMember) {
+            _openJoinCommitteeSheet();
+          } else {
+            final res = await context.push('/committees/create');
+            if (res == true) await _fetchCommittees();
+          }
         },
       ),
-      body: _buildBody(tokens),
+      body: _buildBody(tokens, isMember),
     );
   }
 
-  Widget _buildBody(AppColorTokens tokens) {
+  Widget _buildBody(AppColorTokens tokens, bool isMember) {
     if (_isLoading) {
       return const LoadingStateWidget(message: 'Loading committees...');
     }
@@ -126,13 +154,19 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
 
     if (_committees.isEmpty) {
       return EmptyStateWidget(
-        icon: Icons.groups_outlined,
-        title: 'No Committees Found',
-        description: 'You have not created any committees in this workspace yet.',
-        actionLabel: 'Create Committee',
+        icon: isMember ? Icons.person_search_rounded : Icons.groups_outlined,
+        title: isMember ? 'No Committees Joined' : 'No Committees Found',
+        description: isMember
+            ? 'Enter your 8-digit Committee Code and registered mobile number to view your committee dues and auctions.'
+            : 'You have not created any committees in this workspace yet.',
+        actionLabel: isMember ? 'Join with Code' : 'Create Committee',
         onAction: () async {
-          final res = await context.push('/committees/create');
-          if (res == true) await _fetchCommittees();
+          if (isMember) {
+            _openJoinCommitteeSheet();
+          } else {
+            final res = await context.push('/committees/create');
+            if (res == true) await _fetchCommittees();
+          }
         },
       );
     }
@@ -201,6 +235,45 @@ class _CommitteeListScreenState extends State<CommitteeListScreen> {
                       '${c['frequency']} • ${c['duration_count']} ${c['duration_unit']}S • $memberCount Members',
                       style: TextStyle(fontSize: 13, color: tokens.onSurfaceVariant),
                     ),
+                    if (c['code'] != null && c['code'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      InkWell(
+                        onTap: () {
+                          Clipboard.setData(ClipboardData(text: c['code'].toString()));
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Committee Code "${c['code']}" copied to clipboard! Share it with members.'),
+                              backgroundColor: tokens.primary,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: tokens.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: tokens.primary.withValues(alpha: 0.2)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('CODE: ', style: TextStyle(fontSize: 10, color: tokens.onSurfaceVariant)),
+                              Text(
+                                c['code'].toString(),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                  color: tokens.primary,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(Icons.copy_rounded, size: 12, color: tokens.primary),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
                     const Divider(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

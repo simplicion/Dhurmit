@@ -66,8 +66,15 @@ void main() {
       expect(find.text('DHURMIT'), findsOneWidget);
       expect(find.text('COMMITTEE MANAGEMENT & FINANCIAL LEDGER'), findsOneWidget);
       expect(find.textContaining('Automated committee ledgers and contribution tracking'), findsOneWidget);
-      expect(find.text('Continue with 180 Profile'), findsOneWidget);
+      expect(find.text('Continue as Committee Organizer'), findsOneWidget);
+      expect(find.text('Organizer'), findsOneWidget);
+      expect(find.text('Member'), findsOneWidget);
       expect(find.text('Protected by 180 Sovereign Identity Cloud'), findsOneWidget);
+
+      // Verify toggling to Member updates button
+      await tester.tap(find.text('Member'));
+      await tester.pump();
+      expect(find.text('Continue as Community Member'), findsOneWidget);
 
       // Verify legacy cards and form inputs are deleted
       expect(find.text('Automated Committee Ledgers'), findsNothing);
@@ -77,14 +84,14 @@ void main() {
       expect(find.text('Sign In'), findsNothing);
     });
 
-    testWidgets('Tapping Continue with 180 Profile initiates direct 180 sign-in without intermediate modal', (tester) async {
+    testWidgets('Tapping Continue as Committee Organizer initiates direct 180 sign-in without intermediate modal', (tester) async {
       await tester.pumpWidget(wrapAppShell(
         const LoginScreen(),
         syncEngine: syncEngine,
         cacheStore: cacheStore,
       ));
 
-      final button = find.text('Continue with 180 Profile');
+      final button = find.text('Continue as Committee Organizer');
       expect(button, findsOneWidget);
 
       await tester.ensureVisible(button);

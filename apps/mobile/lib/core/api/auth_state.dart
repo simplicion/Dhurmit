@@ -50,11 +50,25 @@ class AuthState extends ChangeNotifier {
     }
   }
 
-  Future<void> register(String displayName, String email, String password, {String? phone}) async {
+  String get userType => _user?['userType']?.toString() ?? 'ORGANIZER';
+  bool get isOrganizer => userType == 'ORGANIZER';
+  bool get isMember => userType == 'MEMBER';
+
+  Future<void> setUserType(String type) async {
+    if (_user != null) {
+      _user!['userType'] = type;
+      notifyListeners();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_data', jsonEncode(_user));
+    }
+  }
+
+  Future<void> register(String displayName, String email, String password, {String? phone, String userType = 'ORGANIZER'}) async {
     final res = await apiClient.post('/auth/register', body: {
       'displayName': displayName,
       'email': email,
       'password': password,
+      'userType': userType,
       if (phone != null && phone.isNotEmpty) 'phone': phone,
     });
 
@@ -70,9 +84,16 @@ class AuthState extends ChangeNotifier {
     await _persistSession(res);
   }
 
-  Future<void> loginWith180(String code, {String? token, Map<String, dynamic>? user, String? redirectUri}) async {
+  Future<void> loginWith180(
+    String code, {
+    String? token,
+    Map<String, dynamic>? user,
+    String? redirectUri,
+    String userType = 'ORGANIZER',
+  }) async {
     final res = await apiClient.post('/auth/180/exchange', body: {
       'code': code,
+      'userType': userType,
       if (token != null) 'token': token,
       if (user != null) 'user': user,
       if (redirectUri != null) 'redirectUri': redirectUri,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/api/auth_state.dart';
 import '../../../core/money/app_money.dart';
+import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/state_widgets.dart';
 import '../../../core/widgets/status_badge.dart';
@@ -278,7 +279,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget _buildFilterChip({
     required String label,
     required CalendarFilter filter,
-    required dynamic tokens,
+    required AppColorTokens tokens,
     bool isWarning = false,
   }) {
     final isSelected = _selectedFilter == filter;
@@ -596,6 +597,77 @@ class _DayScheduleCardState extends State<_DayScheduleCard> {
               ),
             ),
           ),
+
+          // Bidding Round Highlight Banner (Chit Fund Auction Pot Award)
+          if (widget.day['biddingRound'] != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 14, right: 14, bottom: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.amber.shade400, width: 1.2),
+                ),
+                child: Row(
+                  children: [
+                    const Text('🏆', style: TextStyle(fontSize: 18)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Round #${widget.day['biddingRound']['roundNumber']} Pot Auction',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: Colors.amber.shade900,
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: widget.day['biddingRound']['status'] == 'AWARDED'
+                                      ? Colors.amber.shade200
+                                      : Colors.green.shade100,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  widget.day['biddingRound']['status'] == 'AWARDED' ? 'AWARDED' : 'OPEN',
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: widget.day['biddingRound']['status'] == 'AWARDED'
+                                        ? Colors.brown.shade900
+                                        : Colors.green.shade900,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          if (widget.day['biddingRound']['status'] == 'AWARDED')
+                            Text(
+                              'Winner: ${widget.day['biddingRound']['winnerName']} • Payout: ${AppMoney.fromPaisa(widget.day['biddingRound']['netPayoutMinor']).formatShort()} (Margin: ${AppMoney.fromPaisa(widget.day['biddingRound']['winningBidMinor']).formatShort()})',
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.brown.shade800),
+                            )
+                          else
+                            Text(
+                              'Total Pot: ${AppMoney.fromPaisa(widget.day['biddingRound']['totalPotMinor']).formatShort()} • Live for Member Bidding',
+                              style: TextStyle(fontSize: 11, color: Colors.brown.shade800),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
 
           // Expanded Content
           AnimatedCrossFade(

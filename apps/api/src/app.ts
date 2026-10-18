@@ -14,6 +14,7 @@ import { membersRouter } from './modules/members/presentation/routes.js';
 import { ledgerRouter } from './modules/ledger/presentation/routes.js';
 import { reportsRouter } from './modules/reports/presentation/routes.js';
 import { auditRouter } from './modules/audit/presentation/routes.js';
+import { biddingRouter } from './modules/bidding/presentation/routes.js';
 
 export function createApp(): Express {
   const app = express();
@@ -53,6 +54,7 @@ export function createApp(): Express {
   apiV1.use(committeesRouter);
   apiV1.use(membersRouter);
   apiV1.use(ledgerRouter);
+  apiV1.use(biddingRouter);
   apiV1.use(reportsRouter);
   apiV1.use(auditRouter);
 

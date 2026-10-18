@@ -37,6 +37,15 @@ async function getAuthorizedCommittee(committeeId: string, userId: string, requi
   return committee;
 }
 
+function generateCommitteeCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 // GET /committees
 committeesRouter.get(
   '/committees',
@@ -44,15 +53,18 @@ committeesRouter.get(
     const userId = req.user!.userId;
     const workspaceId = req.user!.workspaceId || (req.headers['x-workspace-id'] as string);
 
+    // Organizers see all committees in their workspaces; Members see committees they are enrolled in
     const resCommittees = await query(
       `SELECT c.*,
               (SELECT COUNT(*) FROM committee_members cm WHERE cm.committee_id = c.id AND cm.membership_status = 'ACTIVE') as member_count,
               (SELECT COALESCE(SUM(o.due_amount_minor), 0) FROM obligations o WHERE o.committee_id = c.id) as total_expected_minor,
               (SELECT COALESCE(SUM(ca.amount_minor), 0) FROM collection_allocations ca WHERE ca.obligation_id IN (SELECT id FROM obligations WHERE committee_id = c.id)) as total_collected_minor
        FROM committees c
-       JOIN workspace_memberships wm ON wm.workspace_id = c.workspace_id
-       WHERE wm.user_id = $1 AND wm.status = 'ACTIVE'
-         ${workspaceId ? 'AND c.workspace_id = $2' : ''}
+       WHERE (
+         c.workspace_id IN (SELECT workspace_id FROM workspace_memberships WHERE user_id = $1 AND status = 'ACTIVE')
+         OR c.id IN (SELECT cm.committee_id FROM committee_members cm JOIN members m ON m.id = cm.member_id WHERE m.user_id = $1)
+       )
+       ${workspaceId ? 'AND c.workspace_id = $2' : ''}
        ORDER BY c.created_at DESC`,
       workspaceId ? [userId, workspaceId] : [userId]
     );
@@ -102,17 +114,26 @@ committeesRouter.post(
     }
 
     const committee = await withTransaction(async (client) => {
+      let code = generateCommitteeCode();
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const check = await client.query('SELECT id FROM committees WHERE code = $1', [code]);
+        if (check.rowCount === 0) {
+          break;
+        }
+        code = generateCommitteeCode();
+      }
+
       const cRes = await client.query(
         `INSERT INTO committees (
           workspace_id, name, status, currency_code, timezone,
           start_date, duration_count, duration_unit, frequency,
           contribution_amount_minor, schedule_rule, allocation_policy,
-          allow_partial_payment, allow_unallocated_credit, created_by
+          allow_partial_payment, allow_unallocated_credit, created_by, code
         ) VALUES (
           $1, $2, 'DRAFT', $3, $4,
           $5, $6, $7, $8,
           $9, $10, $11,
-          $12, $13, $14
+          $12, $13, $14, $15
         ) RETURNING *`,
         [
           workspaceId,
@@ -129,6 +150,7 @@ committeesRouter.post(
           body.allowPartialPayment,
           body.allowUnallocatedCredit,
           userId,
+          code,
         ]
       );
 
@@ -155,6 +177,121 @@ committeesRouter.post(
     });
 
     sendCreated(res, committee);
+  })
+);
+
+// POST /committees/join
+const joinCommitteeSchema = z.object({
+  committeeCode: z.string().min(4).max(16).transform((s) => s.trim().toUpperCase()),
+  phoneNumber: z.string().min(5),
+  countryCode: z.string().default('+977'),
+});
+
+committeesRouter.post(
+  '/committees/join',
+  asyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user!.userId;
+    const body = joinCommitteeSchema.parse(req.body);
+
+    // 1. Find committee by code
+    const cRes = await query(`SELECT * FROM committees WHERE UPPER(code) = $1`, [body.committeeCode]);
+    if (!cRes.rowCount || cRes.rowCount === 0) {
+      throw new NotFoundError(`No committee found with code "${body.committeeCode}". Please check with your organizer.`);
+    }
+    const committee = cRes.rows[0];
+
+    // 2. Extract digits from phone number for robust matching
+    const inputDigits = (body.countryCode + body.phoneNumber).replace(/\D/g, '');
+    const localDigits = body.phoneNumber.replace(/\D/g, '');
+
+    // 3. Search for member belonging to this committee with this phone number
+    const mRes = await query(
+      `SELECT m.* 
+       FROM members m
+       JOIN committee_members cm ON cm.member_id = m.id
+       WHERE cm.committee_id = $1
+         AND (
+           REGEXP_REPLACE(m.phone, '\\D', '', 'g') = $2
+           OR REGEXP_REPLACE(m.phone, '\\D', '', 'g') LIKE '%' || $3
+           OR m.phone = $4
+         )`,
+      [committee.id, inputDigits, localDigits.slice(-8), body.phoneNumber]
+    );
+
+    if (!mRes.rowCount || mRes.rowCount === 0) {
+      throw new NotFoundError(
+        `No member found with mobile number ending in "${body.phoneNumber}" in committee "${committee.name}". Please ask your organizer to add you to the committee roster with this mobile number.`
+      );
+    }
+
+    const member = mRes.rows[0];
+
+    // 4. Link member to this user in DB and ensure workspace membership
+    await withTransaction(async (client) => {
+      await client.query(`UPDATE members SET user_id = $1 WHERE id = $2`, [userId, member.id]);
+      await client.query(
+        `INSERT INTO workspace_memberships (workspace_id, user_id, role, status)
+         VALUES ($1, $2, 'VIEWER', 'ACTIVE')
+         ON CONFLICT (workspace_id, user_id) DO UPDATE SET status = 'ACTIVE'`,
+        [committee.workspace_id, userId]
+      );
+    });
+
+    // 5. Get member's obligations & dues in this committee
+    const duesRes = await query(
+      `SELECT o.id, o.due_date, o.due_amount_minor,
+              COALESCE(SUM(ca.amount_minor), 0) as allocated_minor
+       FROM obligations o
+       LEFT JOIN collection_allocations ca ON ca.obligation_id = o.id
+       WHERE o.committee_id = $1 AND o.member_id = $2
+       GROUP BY o.id, o.due_date, o.due_amount_minor
+       ORDER BY o.due_date ASC`,
+      [committee.id, member.id]
+    );
+
+    let totalDue = 0n;
+    let totalAllocated = 0n;
+    const obligations = duesRes.rows.map((row) => {
+      const due = BigInt(row.due_amount_minor);
+      const allocated = BigInt(row.allocated_minor);
+      const outstanding = due > allocated ? due - allocated : 0n;
+      totalDue += due;
+      totalAllocated += allocated;
+      return {
+        id: row.id,
+        dueDate: row.due_date instanceof Date ? row.due_date.toISOString().split('T')[0] : String(row.due_date),
+        dueAmountMinor: due.toString(),
+        allocatedAmountMinor: allocated.toString(),
+        outstandingAmountMinor: outstanding.toString(),
+        isPaid: outstanding === 0n,
+      };
+    });
+
+    const totalOutstanding = totalDue > totalAllocated ? totalDue - totalAllocated : 0n;
+
+    sendSuccess(res, {
+      committee: {
+        id: committee.id,
+        name: committee.name,
+        code: committee.code,
+        status: committee.status,
+        currencyCode: committee.currency_code,
+        startDate: committee.start_date,
+        contributionAmountMinor: committee.contribution_amount_minor,
+      },
+      member: {
+        id: member.id,
+        displayName: member.display_name,
+        phone: member.phone,
+      },
+      obligations,
+      duesSummary: {
+        totalDueMinor: totalDue.toString(),
+        totalAllocatedMinor: totalAllocated.toString(),
+        totalOutstandingMinor: totalOutstanding.toString(),
+        overdueCount: obligations.filter((o) => !o.isPaid && new Date(o.dueDate) < new Date()).length,
+      },
+    });
   })
 );
 
@@ -468,13 +605,62 @@ committeesRouter.get(
       });
     }
 
-    const days = Array.from(daysMap.values()).map((d) => ({
-      ...d,
-      totalDueMinor: d.totalDueMinor.toString(),
-      totalCollectedMinor: d.totalCollectedMinor.toString(),
-      totalOutstandingMinor: d.totalOutstandingMinor.toString(),
+    // Fetch bidding rounds for this committee to display in calendar
+    const roundsRes = await query(
+      `SELECT br.*, m.display_name as winner_name
+       FROM bidding_rounds br
+       LEFT JOIN members m ON m.id = br.winner_member_id
+       WHERE br.committee_id = $1
+       ORDER BY br.round_number ASC`,
+      [committeeId]
+    );
+
+    const rounds = roundsRes.rows.map((r) => ({
+      id: r.id,
+      roundNumber: r.round_number,
+      roundDate: r.round_date instanceof Date ? r.round_date.toISOString().split('T')[0] : String(r.round_date),
+      totalPotMinor: r.total_pot_minor,
+      minBidMinor: r.min_bid_minor,
+      status: r.status,
+      winnerMemberId: r.winner_member_id,
+      winnerName: r.winner_name,
+      winningBidMinor: r.winning_bid_minor,
+      netPayoutMinor: r.net_payout_minor,
+      awardedAt: r.awarded_at,
+      notes: r.notes,
     }));
 
-    sendSuccess(res, { days });
+    for (const round of rounds) {
+      if (daysMap.has(round.roundDate)) {
+        daysMap.get(round.roundDate)!.biddingRound = round;
+      } else {
+        // If the round date isn't an obligation due date, include it in the calendar days
+        daysMap.set(round.roundDate, {
+          date: round.roundDate,
+          obligationsCount: 0,
+          paidOnTimeCount: 0,
+          paidLateCount: 0,
+          overdueCount: 0,
+          upcomingCount: 0,
+          partialCount: 0,
+          totalDueMinor: 0n,
+          totalCollectedMinor: 0n,
+          totalOutstandingMinor: 0n,
+          items: [],
+          biddingRound: round,
+        });
+      }
+    }
+
+    const days = Array.from(daysMap.values())
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map((d) => ({
+        ...d,
+        totalDueMinor: d.totalDueMinor.toString(),
+        totalCollectedMinor: d.totalCollectedMinor.toString(),
+        totalOutstandingMinor: d.totalOutstandingMinor.toString(),
+      }));
+
+    sendSuccess(res, { days, rounds });
   })
 );

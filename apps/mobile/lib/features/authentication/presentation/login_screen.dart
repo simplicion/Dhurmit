@@ -21,6 +21,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
+  String _selectedRole = 'ORGANIZER'; // 'ORGANIZER' | 'MEMBER'
 
   Future<void> _handle180SignIn() async {
     setState(() => _isLoading = true);
@@ -59,6 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
             authCode ?? '180_session_verified',
             user: userPayload,
             redirectUri: redirectUri,
+            userType: _selectedRole,
           );
           if (mounted) {
             context.go('/home');
@@ -163,12 +165,153 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
+
+                  // ─── ROLE SELECTOR: ORGANIZER VS COMMUNITY MEMBER ───
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: tokens.surfaceVariant.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: tokens.outline.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => setState(() => _selectedRole = 'ORGANIZER'),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: _selectedRole == 'ORGANIZER'
+                                    ? tokens.surface
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: _selectedRole == 'ORGANIZER'
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.08),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    '👑',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Organizer',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: _selectedRole == 'ORGANIZER'
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: _selectedRole == 'ORGANIZER'
+                                          ? tokens.onBackground
+                                          : tokens.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            onTap: () => setState(() => _selectedRole = 'MEMBER'),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: _selectedRole == 'MEMBER'
+                                    ? tokens.surface
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: _selectedRole == 'MEMBER'
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: 0.08),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    '👥',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Member',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: _selectedRole == 'MEMBER'
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                      color: _selectedRole == 'MEMBER'
+                                          ? tokens.onBackground
+                                          : tokens.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Micro context banner
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _selectedRole == 'ORGANIZER'
+                          ? tokens.primary.withValues(alpha: 0.07)
+                          : tokens.secondary.withValues(alpha: 0.07),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _selectedRole == 'ORGANIZER'
+                            ? tokens.primary.withValues(alpha: 0.2)
+                            : tokens.secondary.withValues(alpha: 0.2),
+                      ),
+                    ),
+                    child: Text(
+                      _selectedRole == 'ORGANIZER'
+                          ? '👑 Organizer Mode: Create and run committees, record collections, release monthly bidding rounds & award payouts.'
+                          : '👥 Member Mode: Join committees via 8-digit code, view your payment obligations & place bets in auctions.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                        color: tokens.onBackground,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
 
                   // ─── OFFICIAL 180 IDENTITY AUTHENTICATION BUTTON ───
                   OneEightyAuthButton(
                     isLoading: _isLoading,
-                    title: 'Continue with 180 Profile',
+                    title: _selectedRole == 'ORGANIZER'
+                        ? 'Continue as Committee Organizer'
+                        : 'Continue as Community Member',
                     subtitle: 'Universal WhatsApp OTP & Biometric Passkey',
                     onPressed: _handle180SignIn,
                   ),

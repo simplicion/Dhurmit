@@ -113,7 +113,7 @@ identityRouter.post(
     const body = loginSchema.parse(req.body);
 
     const userRes = await query(
-      `SELECT id, display_name, email, password_hash, status FROM users WHERE email = $1`,
+      `SELECT id, display_name, email, password_hash, status, user_type FROM users WHERE email = $1`,
       [body.email.toLowerCase()]
     );
 
@@ -154,6 +154,7 @@ identityRouter.post(
         id: user.id,
         displayName: user.display_name,
         email: user.email,
+        userType: user.user_type || 'ORGANIZER',
       },
       workspace: activeWorkspace
         ? {
@@ -297,6 +298,7 @@ const exchange180Schema = z
     accessToken: z.string().optional(),
     user: z.record(z.any()).optional(),
     redirectUri: z.string().optional(),
+    userType: z.enum(['ORGANIZER', 'MEMBER']).default('ORGANIZER'),
   })
   .refine(
     (data) => Boolean(data.code || data.token || data.accessToken || data.user),
@@ -441,14 +443,14 @@ identityRouter.post(
     const result = await withTransaction(async (client) => {
       // 1. Check if user with this auth_subject exists
       let userQuery = await client.query(
-        `SELECT id, display_name, email, phone_e164, status FROM users WHERE auth_subject = $1`,
+        `SELECT id, display_name, email, phone_e164, status, user_type FROM users WHERE auth_subject = $1`,
         [authSubject]
       );
 
       // 2. If not found by auth_subject, check by email if available
       if (userQuery.rowCount === 0 && profile.email) {
         userQuery = await client.query(
-          `SELECT id, display_name, email, phone_e164, status FROM users WHERE email = $1`,
+          `SELECT id, display_name, email, phone_e164, status, user_type FROM users WHERE email = $1`,
           [profile.email.toLowerCase()]
         );
 
@@ -467,14 +469,15 @@ identityRouter.post(
       } else {
         // Create new user
         const newUserRes = await client.query(
-          `INSERT INTO users (display_name, email, phone_e164, auth_subject, status)
-           VALUES ($1, $2, $3, $4, 'ACTIVE')
-           RETURNING id, display_name, email, phone_e164, status, created_at`,
+          `INSERT INTO users (display_name, email, phone_e164, auth_subject, status, user_type)
+           VALUES ($1, $2, $3, $4, 'ACTIVE', $5)
+           RETURNING id, display_name, email, phone_e164, status, user_type, created_at`,
           [
             profile.name,
             profile.email ? profile.email.toLowerCase() : null,
             profile.phone || null,
             authSubject,
+            body.userType || 'ORGANIZER',
           ]
         );
         user = newUserRes.rows[0];
@@ -540,6 +543,8 @@ identityRouter.post(
         id: result.user.id,
         displayName: result.user.display_name,
         email: result.user.email,
+        phone: result.user.phone_e164,
+        userType: result.user.user_type || body.userType || 'ORGANIZER',
       },
       workspace: {
         id: result.activeWorkspace.id,

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/api/auth_state.dart';
@@ -10,6 +11,7 @@ import '../../members/presentation/member_list_screen.dart';
 import '../../calendar/presentation/calendar_screen.dart';
 import '../../collections/presentation/collection_history_screen.dart';
 import '../../collections/presentation/record_collection_bottom_sheet.dart';
+import '../../bidding/presentation/bidding_rounds_screen.dart';
 
 class CommitteeDashboardScreen extends StatefulWidget {
   final String committeeId;
@@ -29,7 +31,7 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _loadDashboard();
   }
 
@@ -135,6 +137,8 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
     }
 
     final isDraft = _committee!['status'] == 'DRAFT';
+    final String? code = _committee!['code'] as String?;
+    final bool isOrganizer = context.watch<AuthState>().isOrganizer;
     final expected = AppMoney.fromPaisa(_committee!['totalExpectedMinor'] ?? '0');
     final collected = AppMoney.fromPaisa(_committee!['totalCollectedMinor'] ?? '0');
     final outstanding = AppMoney.fromPaisa(_committee!['totalOutstandingMinor'] ?? '0');
@@ -142,11 +146,40 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          (_committee!['name'] as String?) ?? 'Committee',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              (_committee!['name'] as String?) ?? 'Committee',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+            ),
+            if (code != null && code.isNotEmpty)
+              Text(
+                'CODE: $code',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5,
+                  color: tokens.primary,
+                ),
+              ),
+          ],
         ),
         actions: [
+          if (code != null && code.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.copy_rounded, size: 20),
+              tooltip: 'Copy Committee Code',
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: code));
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Committee Code "$code" copied to clipboard! Share it with members.'),
+                    backgroundColor: tokens.primary,
+                  ),
+                );
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadDashboard,
@@ -154,6 +187,8 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
         ],
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.start,
           labelColor: tokens.primary,
           unselectedLabelColor: tokens.onSurfaceVariant,
           indicatorColor: tokens.primary,
@@ -161,6 +196,7 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
             Tab(text: 'Overview'),
             Tab(text: 'Members'),
             Tab(text: 'Calendar'),
+            Tab(text: 'Release Bets'),
             Tab(text: 'History'),
           ],
         ),
@@ -176,6 +212,54 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (code != null && code.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: tokens.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: tokens.primary.withValues(alpha: 0.25)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.vpn_key_rounded, color: tokens.primary, size: 22),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Committee Code for Members', style: TextStyle(fontSize: 11, color: tokens.onSurfaceVariant)),
+                                Text(
+                                  code,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 3,
+                                    color: tokens.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              side: BorderSide(color: tokens.primary),
+                            ),
+                            icon: const Icon(Icons.copy_rounded, size: 14),
+                            label: const Text('Copy', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                            onPressed: () {
+                              Clipboard.setData(ClipboardData(text: code));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Committee Code "$code" copied!')),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   if (isDraft) ...[
                     Container(
                       padding: const EdgeInsets.all(14),
@@ -306,6 +390,11 @@ class _CommitteeDashboardScreenState extends State<CommitteeDashboardScreen> wit
           ),
           // Calendar Tab
           CalendarScreen(committeeId: widget.committeeId),
+          // Release Bets / Chit Fund Bidding Tab
+          BiddingRoundsScreen(
+            committeeId: widget.committeeId,
+            isOrganizer: isOrganizer,
+          ),
           // History Tab
           CollectionHistoryScreen(committeeId: widget.committeeId),
         ],
