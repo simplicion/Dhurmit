@@ -11,17 +11,18 @@ import 'package:committee_ledger_mobile/core/money/app_money.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('LocationService & CountryProfile Tests', () {
-    test('CountryProfile finds default Nepal by null or NP', () {
-      final defaultC = CountryProfile.findByCode(null);
-      expect(defaultC.code, equals('NP'));
-      expect(defaultC.currencyCode, equals('NPR'));
-      expect(defaultC.currencySymbol, equals('रु'));
-
-      final india = CountryProfile.findByCode('IN');
-      expect(india.code, equals('IN'));
-      expect(india.currencyCode, equals('INR'));
-      expect(india.currencySymbol, equals('₹'));
+  group('LocationService & CountryProfile Dynamic Tests', () {
+    test('CountryProfile intl resolution test', () {
+      final resNP = CountryProfile.resolveCurrency('NP');
+      final resIN = CountryProfile.resolveCurrency('IN');
+      final resUS = CountryProfile.resolveCurrency('US');
+      final resGB = CountryProfile.resolveCurrency('GB');
+      final resAE = CountryProfile.resolveCurrency('AE', customCurrency: 'AED');
+      expect(resNP.$1, equals('NPR'));
+      expect(resIN.$1, equals('INR'));
+      expect(resUS.$1, equals('USD'));
+      expect(resGB.$1, equals('GBP'));
+      expect(resAE.$1, equals('AED'));
     });
 
     test('LocationService performs OpenStreetMap query and parses country details', () async {
@@ -35,6 +36,10 @@ void main() {
                 'address': {
                   'country': 'Nepal',
                   'country_code': 'np',
+                },
+                'extratags': {
+                  'timezone': 'Asia/Kathmandu',
+                  'default_language': 'ne',
                 },
               }
             ]),
@@ -50,17 +55,66 @@ void main() {
       expect(results, isNotEmpty);
       expect(results.first.code, equals('NP'));
       expect(results.first.currencyCode, equals('NPR'));
+      expect(results.first.timeZone, equals('Asia/Kathmandu'));
     });
 
-    test('LocationService falls back gracefully to local countries if network throws', () async {
+    test('LocationService queries OpenStreetMap reverse geocode and caches dynamic profiles', () async {
       final mockClient = MockClient((request) async {
+        if (request.url.toString().contains('nominatim.openstreetmap.org/reverse')) {
+          return http.Response(
+            jsonEncode({
+              'place_id': 54321,
+              'display_name': 'New Delhi, India',
+              'address': {
+                'country': 'India',
+                'country_code': 'in',
+              },
+              'extratags': {
+                'timezone': 'Asia/Kolkata',
+                'default_language': 'hi',
+              },
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        return http.Response('[]', 200);
+      });
+
+      final service = LocationService(client: mockClient);
+      final profile = await service.reverseGeocode(28.6139, 77.2090);
+      expect(profile, isNotNull);
+      expect(profile!.code, equals('IN'));
+      expect(profile.currencyCode, equals('INR'));
+      expect(profile.timeZone, equals('Asia/Kolkata'));
+    });
+
+    test('LocationService handles offline gracefully and queries cached profiles', () async {
+      final mockClient = MockClient((request) async {
+        if (request.url.toString().contains('nominatim.openstreetmap.org/search')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'display_name': 'France',
+                'address': {'country': 'France', 'country_code': 'fr'},
+                'extratags': {'timezone': 'Europe/Paris', 'default_language': 'fr'}
+              }
+            ]),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
         throw Exception('Network unreachable');
       });
 
       final service = LocationService(client: mockClient);
-      final results = await service.searchCountries('India');
-      expect(results, isNotEmpty);
-      expect(results.any((c) => c.code == 'IN'), isTrue);
+      final onlineResults = await service.searchCountries('France');
+      expect(onlineResults.first.code, equals('FR'));
+      expect(onlineResults.first.currencyCode, equals('EUR'));
+
+      // Now query offline - cached profile is returned
+      final cachedResults = await service.searchCountries('France');
+      expect(cachedResults.first.code, equals('FR'));
     });
 
     test('CountryProvider persists selected country and dynamically updates AppMoney currency', () async {

@@ -52,8 +52,8 @@ class CountryProvider extends ChangeNotifier {
     _isDetecting = true;
     notifyListeners();
     try {
-      // In web or environments without native GPS, query default or IP approximation
-      final results = await _locationService.searchCountries('Nepal');
+      // Query OpenStreetMap dynamically for region detection
+      final results = await _locationService.searchCountries('');
       if (results.isNotEmpty) {
         await setCountry(results.first);
         _isDetecting = false;

@@ -22,8 +22,16 @@ class CountryPickerBottomSheet extends StatefulWidget {
 
 class _CountryPickerBottomSheetState extends State<CountryPickerBottomSheet> {
   final _searchController = TextEditingController();
-  List<CountryProfile> _countries = CountryProfile.supportedCountries;
+  List<CountryProfile> _countries = [];
   bool _isSearching = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _handleSearch('');
+    });
+  }
 
   @override
   void dispose() {
@@ -208,11 +216,53 @@ class _CountryPickerBottomSheetState extends State<CountryPickerBottomSheet> {
 
           // Countries List
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-              itemCount: _countries.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 6),
-              itemBuilder: (context, index) {
+            child: _countries.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_isSearching) ...[
+                            CircularProgressIndicator(color: tokens.primary),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Querying OpenStreetMap...',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
+                                color: tokens.onSurfaceVariant,
+                              ),
+                            ),
+                          ] else ...[
+                            Icon(Icons.public_off_rounded, size: 40, color: tokens.onSurfaceVariant),
+                            const SizedBox(height: 12),
+                            Text(
+                              'No countries found on OpenStreetMap',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: tokens.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Try typing a country name, ISO code, or currency',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: tokens.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    itemCount: _countries.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 6),
+                    itemBuilder: (context, index) {
                 final country = _countries[index];
                 final isSelected = country.code == active.code;
 
