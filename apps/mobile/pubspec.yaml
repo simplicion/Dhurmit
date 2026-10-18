@@ -20,6 +20,7 @@ dependencies:
   google_fonts: ^6.2.1
   connectivity_plus: ^7.3.2
   url_launcher: ^6.3.3
+  flutter_custom_tabs: ^2.6.0
 
 dev_dependencies:
   flutter_test:

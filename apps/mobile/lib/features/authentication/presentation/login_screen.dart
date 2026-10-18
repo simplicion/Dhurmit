@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../core/api/auth_state.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/one_eighty_auth_button.dart';
@@ -11,6 +10,7 @@ import '../../../core/widgets/one_eighty_launcher.dart';
 import '../../../core/location/country_provider.dart';
 import '../../../core/location/country_picker_bottom_sheet.dart';
 import 'member_login_bottom_sheet.dart';
+import 'package:flutter_custom_tabs/flutter_custom_tabs.dart' as custom_tabs;
 
 /// Primary Login Screen for Dhurmit.
 /// Clean, minimalist, and focused:
@@ -77,11 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       } else {
         // Mobile platform (Android / iOS):
-        // Launch official 180 Sovereign Identity SSO in In-App Browser / Custom Tab
+        // Launch official 180 Sovereign Identity in system native bottom sheet (Partial Custom Tab / PageSheet)
         const mobileRedirectUri = 'https://dhurmit.simplicion.com/auth/callback';
         final authUrl = Uri.parse(
-          'https://auth.180workspace.com/auth/login?'
-          'client_id=$clientId&'
+          'https://profile.180core.cloud/auth/login?'
+          'client_id=${Uri.encodeComponent(clientId)}&'
           'redirect_uri=${Uri.encodeComponent(mobileRedirectUri)}&'
           'response_type=code&'
           'scope=${Uri.encodeComponent('openid identity:read identity:email identity:phone')}&'
@@ -90,39 +90,33 @@ class _LoginScreenState extends State<LoginScreen> {
           'app=auth',
         );
 
-        bool launched = false;
-        try {
-          launched = await launchUrl(
-            authUrl,
-            mode: LaunchMode.inAppBrowserView,
-          );
-        } catch (_) {}
+        final mediaQuery = MediaQuery.of(context);
+        final initialHeight = mediaQuery.size.height * 0.85;
 
-        if (!launched) {
-          try {
-            launched = await launchUrl(
-              authUrl,
-              mode: LaunchMode.externalApplication,
-            );
-          } catch (_) {}
-        }
-
-        if (!launched) {
-          try {
-            launched = await launchUrl(
-              authUrl,
-              mode: LaunchMode.platformDefault,
-            );
-          } catch (_) {}
-        }
-
-        if (!launched && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Cannot launch 180 Identity. Please verify internet connection.'),
+        await custom_tabs.launchUrl(
+          authUrl,
+          customTabsOptions: custom_tabs.CustomTabsOptions.partial(
+            configuration: custom_tabs.PartialCustomTabsConfiguration.bottomSheet(
+              initialHeight: initialHeight,
+              activityHeightResizeBehavior: custom_tabs.CustomTabsActivityHeightResizeBehavior.adjustable,
+              cornerRadius: 24,
             ),
-          );
-        }
+            colorSchemes: custom_tabs.CustomTabsColorSchemes.defaults(
+              toolbarColor: const Color(0xFF09090B),
+            ),
+            showTitle: true,
+          ),
+          safariVCOptions: const custom_tabs.SafariViewControllerOptions.pageSheet(
+            configuration: custom_tabs.SheetPresentationControllerConfiguration(
+              detents: {
+                custom_tabs.SheetPresentationControllerDetent.large,
+                custom_tabs.SheetPresentationControllerDetent.medium,
+              },
+              prefersScrollingExpandsWhenScrolledToEdge: true,
+              prefersGrabberVisible: true,
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (!mounted) return;
