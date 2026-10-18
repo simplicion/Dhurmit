@@ -1,5 +1,5 @@
-// modules/members/presentation/routes.ts
 import { Router, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { query, withTransaction } from '../../../shared/infrastructure/postgres/connection.js';
 import { sendCreated, sendSuccess } from '../../../shared/presentation/response.js';
@@ -60,7 +60,7 @@ membersRouter.get(
     }
 
     const result = await query(
-      `SELECT m.id, m.display_name, m.phone, m.external_reference, m.notes, m.status as member_status,
+      `SELECT m.id, m.display_name, m.phone, (m.password_hash IS NOT NULL) as has_password, m.external_reference, m.notes, m.status as member_status,
               cm.membership_status, cm.joined_at, cm.left_at,
               COALESCE(
                 (SELECT SUM(o.due_amount_minor) FROM obligations o WHERE o.committee_id = $1 AND o.member_id = m.id), 0
@@ -87,6 +87,7 @@ membersRouter.get(
         id: row.id,
         displayName: row.display_name,
         phone: row.phone,
+        hasPassword: Boolean(row.has_password),
         externalReference: row.external_reference,
         notes: row.notes,
         memberStatus: row.member_status,
@@ -107,6 +108,7 @@ membersRouter.get(
 const addMemberSchema = z.object({
   displayName: z.string().min(2, 'Member name must be at least 2 characters'),
   phone: z.string().optional(),
+  password: z.string().min(3, 'Password or PIN must be at least 3 characters').optional(),
   externalReference: z.string().optional(),
   notes: z.string().optional(),
   joinedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
@@ -122,12 +124,14 @@ membersRouter.post(
     const body = addMemberSchema.parse(req.body);
     const joinedDate = body.joinedAt || (committee.start_date instanceof Date ? committee.start_date.toISOString().split('T')[0] : committee.start_date);
 
+    const passwordHash = body.password ? await bcrypt.hash(body.password, 10) : null;
+
     const member = await withTransaction(async (client) => {
       const mRes = await client.query(
-        `INSERT INTO members (workspace_id, display_name, phone, external_reference, notes, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO members (workspace_id, display_name, phone, password_hash, external_reference, notes, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING *`,
-        [committee.workspace_id, body.displayName, body.phone || null, body.externalReference || null, body.notes || null, userId]
+        [committee.workspace_id, body.displayName, body.phone || null, passwordHash, body.externalReference || null, body.notes || null, userId]
       );
       const newMember = mRes.rows[0];
 
@@ -209,6 +213,7 @@ membersRouter.get(
 const updateMemberSchema = z.object({
   displayName: z.string().min(2).optional(),
   phone: z.string().optional(),
+  password: z.string().min(3, 'Password or PIN must be at least 3 characters').optional(),
   externalReference: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -222,16 +227,19 @@ membersRouter.patch(
     const committee = await getAuthorizedCommittee(committeeId, userId);
     const body = updateMemberSchema.parse(req.body);
 
+    const passwordHash = body.password ? await bcrypt.hash(body.password, 10) : undefined;
+
     const resUpdate = await query(
       `UPDATE members
        SET display_name = COALESCE($1, display_name),
            phone = COALESCE($2, phone),
-           external_reference = COALESCE($3, external_reference),
-           notes = COALESCE($4, notes),
+           password_hash = COALESCE($3, password_hash),
+           external_reference = COALESCE($4, external_reference),
+           notes = COALESCE($5, notes),
            updated_at = NOW()
-       WHERE id = $5 AND workspace_id = $6
-       RETURNING *`,
-      [body.displayName, body.phone, body.externalReference, body.notes, memberId, committee.workspace_id]
+       WHERE id = $6 AND workspace_id = $7
+       RETURNING id, display_name, phone, (password_hash IS NOT NULL) as has_password, external_reference, notes, status`,
+      [body.displayName, body.phone, passwordHash, body.externalReference, body.notes, memberId, committee.workspace_id]
     );
 
     if (!resUpdate.rowCount || resUpdate.rowCount === 0) {

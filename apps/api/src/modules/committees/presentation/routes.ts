@@ -1,5 +1,6 @@
 // modules/committees/presentation/routes.ts
 import { Router, Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { query, withTransaction } from '../../../shared/infrastructure/postgres/connection.js';
 import { sendCreated, sendSuccess } from '../../../shared/presentation/response.js';
@@ -8,6 +9,7 @@ import {
   DomainError,
   ForbiddenError,
   NotFoundError,
+  UnauthenticatedError,
 } from '../../../shared/domain/errors.js';
 import { requireAuth } from '../../../shared/presentation/middlewares/auth.middleware.js';
 import { ScheduleGenerator } from '../../schedule/domain/schedule-generator.js';
@@ -185,6 +187,7 @@ const joinCommitteeSchema = z.object({
   committeeCode: z.string().min(4).max(16).transform((s) => s.trim().toUpperCase()),
   phoneNumber: z.string().min(5),
   countryCode: z.string().default('+977'),
+  password: z.string().optional(),
 });
 
 committeesRouter.post(
@@ -226,7 +229,20 @@ committeesRouter.post(
 
     const member = mRes.rows[0];
 
-    // 4. Link member to this user in DB and ensure workspace membership
+    // 4. Verify password if set on member profile
+    if (member.password_hash) {
+      if (!body.password) {
+        throw new UnauthenticatedError(
+          'A member password or PIN is required to link this committee account.'
+        );
+      }
+      const match = await bcrypt.compare(body.password, member.password_hash);
+      if (!match) {
+        throw new UnauthenticatedError('Invalid member password or PIN.');
+      }
+    }
+
+    // 5. Link member to this user in DB and ensure workspace membership
     await withTransaction(async (client) => {
       await client.query(`UPDATE members SET user_id = $1 WHERE id = $2`, [userId, member.id]);
       await client.query(

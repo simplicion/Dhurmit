@@ -10,6 +10,7 @@ import { sendCreated, sendSuccess } from '../../../shared/presentation/response.
 import { asyncHandler } from '../../../shared/presentation/async-handler.js';
 import {
   ConflictError,
+  NotFoundError,
   UnauthenticatedError,
 } from '../../../shared/domain/errors.js';
 import {
@@ -163,6 +164,147 @@ identityRouter.post(
             role: activeWorkspace.role,
           }
         : null,
+      tokens: {
+        accessToken,
+        refreshToken,
+        expiresIn: env.JWT_ACCESS_TTL_SECONDS,
+      },
+    });
+  })
+);
+
+const memberLoginSchema = z.object({
+  committeeCode: z.string().min(4).max(36).transform((s) => s.trim().toUpperCase()),
+  phone: z.string().min(5),
+  password: z.string().min(1, 'Password or PIN is required'),
+});
+
+identityRouter.post(
+  '/auth/member-login',
+  asyncHandler(async (req: Request, res: Response) => {
+    const body = memberLoginSchema.parse(req.body);
+
+    // 1. Find committee by code or ID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.committeeCode);
+    const cRes = isUuid
+      ? await query(`SELECT * FROM committees WHERE id = $1`, [body.committeeCode])
+      : await query(`SELECT * FROM committees WHERE UPPER(code) = $1`, [body.committeeCode]);
+
+    if (!cRes.rowCount || cRes.rowCount === 0) {
+      throw new NotFoundError(`No committee found with code or ID "${body.committeeCode}". Please verify with your organizer.`);
+    }
+    const committee = cRes.rows[0];
+
+    // 2. Normalize phone digits
+    const digitsOnly = body.phone.replace(/\D/g, '');
+    const suffix = digitsOnly.slice(-8);
+
+    // 3. Find member belonging to this committee
+    const mRes = await query(
+      `SELECT m.*, cm.membership_status
+       FROM members m
+       JOIN committee_members cm ON cm.member_id = m.id
+       WHERE cm.committee_id = $1
+         AND (
+           REGEXP_REPLACE(m.phone, '\\D', '', 'g') = $2
+           OR REGEXP_REPLACE(m.phone, '\\D', '', 'g') LIKE '%' || $3
+           OR m.phone = $4
+         )`,
+      [committee.id, digitsOnly, suffix, body.phone]
+    );
+
+    if (!mRes.rowCount || mRes.rowCount === 0) {
+      throw new UnauthenticatedError(
+        `No member found with phone number "${body.phone}" in committee "${committee.name}". Please ask your organizer to add you.`
+      );
+    }
+
+    const member = mRes.rows[0];
+
+    // 4. Verify password
+    if (!member.password_hash) {
+      throw new UnauthenticatedError(
+        `No account password has been set for this member profile yet. Please ask your committee manager to set your password in the app.`
+      );
+    }
+
+    const passwordValid = await bcrypt.compare(body.password, member.password_hash);
+    if (!passwordValid) {
+      throw new UnauthenticatedError('Invalid password or PIN for this member profile.');
+    }
+
+    // 5. Ensure member has an associated user account in users table
+    const result = await withTransaction(async (client) => {
+      let user: any = null;
+      if (member.user_id) {
+        const uRes = await client.query(`SELECT * FROM users WHERE id = $1`, [member.user_id]);
+        if (uRes.rowCount && uRes.rowCount > 0) {
+          user = uRes.rows[0];
+        }
+      }
+
+      if (!user) {
+        // Create user account for member
+        const syntheticEmail = `member.${member.id.substring(0, 8)}@dhurmit.local`;
+        const uRes = await client.query(
+          `INSERT INTO users (display_name, email, phone_e164, password_hash, user_type, status)
+           VALUES ($1, $2, $3, $4, 'MEMBER', 'ACTIVE')
+           RETURNING *`,
+          [member.display_name, syntheticEmail, member.phone || body.phone, member.password_hash]
+        );
+        user = uRes.rows[0];
+
+        // Link member to user
+        await client.query(`UPDATE members SET user_id = $1 WHERE id = $2`, [user.id, member.id]);
+      }
+
+      // Ensure workspace membership as VIEWER
+      await client.query(
+        `INSERT INTO workspace_memberships (workspace_id, user_id, role, status)
+         VALUES ($1, $2, 'VIEWER', 'ACTIVE')
+         ON CONFLICT (workspace_id, user_id) DO UPDATE SET status = 'ACTIVE'`,
+        [committee.workspace_id, user.id]
+      );
+
+      // Fetch workspace info
+      const wsRes = await client.query(`SELECT * FROM workspaces WHERE id = $1`, [committee.workspace_id]);
+      const workspace = wsRes.rows[0];
+
+      return { user, workspace, committee, member };
+    });
+
+    const tokenPayload: TokenPayload = {
+      userId: result.user.id,
+      workspaceId: result.workspace.id,
+      role: 'VIEWER',
+      email: result.user.email || `${result.member.id}@dhurmit.local`,
+    };
+
+    const accessToken = generateAccessToken(tokenPayload);
+    const refreshToken = generateRefreshToken(tokenPayload);
+
+    sendSuccess(res, {
+      user: {
+        id: result.user.id,
+        displayName: result.user.display_name,
+        email: result.user.email,
+        phone: result.user.phone_e164,
+        userType: 'MEMBER',
+      },
+      workspace: {
+        id: result.workspace.id,
+        name: result.workspace.name,
+        role: 'VIEWER',
+      },
+      committee: {
+        id: result.committee.id,
+        name: result.committee.name,
+        code: result.committee.code,
+      },
+      member: {
+        id: result.member.id,
+        displayName: result.member.display_name,
+      },
       tokens: {
         accessToken,
         refreshToken,

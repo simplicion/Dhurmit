@@ -102,6 +102,20 @@ class AuthState extends ChangeNotifier {
     await _persistSession(res);
   }
 
+  Future<void> loginWithMemberCredentials({
+    required String committeeCode,
+    required String phone,
+    required String password,
+  }) async {
+    final res = await apiClient.post('/auth/member-login', body: {
+      'committeeCode': committeeCode.trim().toUpperCase(),
+      'phone': phone.trim(),
+      'password': password.trim(),
+    });
+
+    await _persistSession(res);
+  }
+
   Future<void> _persistSession(dynamic res) async {
     if (res is Map<String, dynamic>) {
       final tokens = res['tokens'] as Map<String, dynamic>;

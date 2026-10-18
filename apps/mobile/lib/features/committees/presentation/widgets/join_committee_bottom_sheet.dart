@@ -19,6 +19,8 @@ class _JoinCommitteeBottomSheetState extends State<JoinCommitteeBottomSheet> {
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
   String _selectedCountryCode = '+977';
 
   bool _isLoading = false;
@@ -39,6 +41,7 @@ class _JoinCommitteeBottomSheetState extends State<JoinCommitteeBottomSheet> {
   void dispose() {
     _codeController.dispose();
     _phoneController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -56,6 +59,8 @@ class _JoinCommitteeBottomSheetState extends State<JoinCommitteeBottomSheet> {
         'committeeCode': _codeController.text.trim().toUpperCase(),
         'countryCode': _selectedCountryCode,
         'phoneNumber': _phoneController.text.trim(),
+        if (_passwordController.text.trim().isNotEmpty)
+          'password': _passwordController.text.trim(),
       });
 
       if (mounted) {
@@ -276,6 +281,32 @@ class _JoinCommitteeBottomSheetState extends State<JoinCommitteeBottomSheet> {
                       Text(
                         'Your mobile number must match the one entered by the organizer when setting up the committee.',
                         style: TextStyle(fontSize: 12, color: tokens.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 18),
+
+                      // Member Account Password / PIN
+                      Text(
+                        'Account Password / PIN',
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: tokens.onSurface),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          hintText: 'PIN or password assigned by organizer',
+                          prefixIcon: Icon(Icons.lock_outline_rounded, color: tokens.primary),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                              color: tokens.onSurfaceVariant,
+                            ),
+                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          ),
+                          filled: true,
+                          fillColor: tokens.surfaceVariant.withValues(alpha: 0.35),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                       ),
                       const SizedBox(height: 24),
 

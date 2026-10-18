@@ -23,6 +23,56 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String _selectedRole = 'ORGANIZER'; // 'ORGANIZER' | 'MEMBER'
 
+  final _memberCodeController = TextEditingController();
+  final _memberPhoneController = TextEditingController();
+  final _memberPasswordController = TextEditingController();
+  bool _obscureMemberPassword = true;
+  bool _isMemberLoggingIn = false;
+
+  @override
+  void dispose() {
+    _memberCodeController.dispose();
+    _memberPhoneController.dispose();
+    _memberPasswordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleMemberLogin() async {
+    final code = _memberCodeController.text.trim().toUpperCase();
+    final phone = _memberPhoneController.text.trim();
+    final password = _memberPasswordController.text.trim();
+
+    if (code.isEmpty || phone.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter Committee Code, Mobile Phone, and Password')),
+      );
+      return;
+    }
+
+    setState(() => _isMemberLoggingIn = true);
+    try {
+      final authState = context.read<AuthState>();
+      await authState.loginWithMemberCredentials(
+        committeeCode: code,
+        phone: phone,
+        password: password,
+      );
+      if (mounted) {
+        context.go('/home');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll('Exception:', '').trim()),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _isMemberLoggingIn = false);
+    }
+  }
+
   Future<void> _handle180SignIn() async {
     setState(() => _isLoading = true);
     try {
@@ -306,12 +356,148 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   const SizedBox(height: 24),
 
+                  if (_selectedRole == 'MEMBER') ...[
+                    // ─── MEMBER DIRECT LOGIN WITH CODE, PHONE & PASSWORD ───
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: tokens.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: tokens.outline.withValues(alpha: 0.15)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: tokens.secondary.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Icon(Icons.pin_outlined, color: tokens.secondary, size: 20),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Member Credentials',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: tokens.onSurface,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 14),
+                          TextField(
+                            controller: _memberCodeController,
+                            textCapitalization: TextCapitalization.characters,
+                            decoration: const InputDecoration(
+                              labelText: 'Committee Code / ID *',
+                              hintText: 'e.g. DH7K9M2P',
+                              prefixIcon: Icon(Icons.tag_rounded),
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _memberPhoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: const InputDecoration(
+                              labelText: 'Your Mobile Phone *',
+                              hintText: 'e.g. 9801234567',
+                              prefixIcon: Icon(Icons.phone_outlined),
+                              border: OutlineInputBorder(),
+                              isDense: true,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          TextField(
+                            controller: _memberPasswordController,
+                            obscureText: _obscureMemberPassword,
+                            decoration: InputDecoration(
+                              labelText: 'Member Password / PIN *',
+                              hintText: 'Assigned by committee manager',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              border: const OutlineInputBorder(),
+                              isDense: true,
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscureMemberPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                                  size: 20,
+                                ),
+                                onPressed: () => setState(() => _obscureMemberPassword = !_obscureMemberPassword),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: tokens.primary,
+                              foregroundColor: tokens.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            onPressed: _isMemberLoggingIn ? null : _handleMemberLogin,
+                            child: _isMemberLoggingIn
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                  )
+                                : const Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(Icons.login_rounded, size: 20),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Sign In to Committee',
+                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: tokens.outline.withValues(alpha: 0.2))),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: Text(
+                            'OR SIGN IN WITH PASSKEY',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1,
+                              color: tokens.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: tokens.outline.withValues(alpha: 0.2))),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
                   // ─── OFFICIAL 180 IDENTITY AUTHENTICATION BUTTON ───
                   OneEightyAuthButton(
                     isLoading: _isLoading,
                     title: _selectedRole == 'ORGANIZER'
                         ? 'Continue as Committee Organizer'
-                        : 'Continue as Community Member',
+                        : 'Sign In via 180 Identity',
                     subtitle: 'Universal WhatsApp OTP & Biometric Passkey',
                     onPressed: _handle180SignIn,
                   ),
