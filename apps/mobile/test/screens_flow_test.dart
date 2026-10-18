@@ -62,7 +62,7 @@ void main() {
   });
 
   group('Screen Flow & Interaction Tests', () {
-    testWidgets('LoginScreen renders app purpose and official 180 Identity button without legacy form fields', (tester) async {
+    testWidgets('LoginScreen renders app purpose, 180 Identity button, and Join as a Member button', (tester) async {
       await tester.pumpWidget(wrapAppShell(
         const LoginScreen(),
         syncEngine: syncEngine,
@@ -73,21 +73,22 @@ void main() {
       expect(find.text('COMMITTEE MANAGEMENT & FINANCIAL LEDGER'), findsOneWidget);
       expect(find.textContaining('Automated committee ledgers and contribution tracking'), findsOneWidget);
       expect(find.text('Continue as Committee Organizer'), findsOneWidget);
-      expect(find.text('Organizer'), findsOneWidget);
-      expect(find.text('Member'), findsOneWidget);
+      expect(find.text('Join as a Member'), findsOneWidget);
       expect(find.text('Protected by 180 Sovereign Identity Cloud'), findsOneWidget);
 
-      // Verify toggling to Member updates button
-      await tester.tap(find.text('Member'));
-      await tester.pump();
-      expect(find.text('Continue as Community Member'), findsOneWidget);
+      // Verify toggle is gone
+      expect(find.text('👑 Organizer Mode: Create and run committees, record collections, release monthly bidding rounds & award payouts.'), findsNothing);
 
-      // Verify legacy cards and form inputs are deleted
-      expect(find.text('Automated Committee Ledgers'), findsNothing);
-      expect(find.text('Lump-Sum Allocation'), findsNothing);
-      expect(find.text('Email Address'), findsNothing);
-      expect(find.text('Password'), findsNothing);
-      expect(find.text('Sign In'), findsNothing);
+      // Verify tapping 'Join as a Member' opens bottom sheet
+      final joinButton = find.text('Join as a Member');
+      await tester.ensureVisible(joinButton);
+      await tester.tap(joinButton);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Committee Code / ID *'), findsOneWidget);
+      expect(find.text('Your Mobile Phone *'), findsOneWidget);
+      expect(find.text('Member Password / PIN *'), findsOneWidget);
+      expect(find.text('Sign In to Committee'), findsOneWidget);
     });
 
     testWidgets('Tapping Continue as Committee Organizer initiates direct 180 sign-in without intermediate modal', (tester) async {
