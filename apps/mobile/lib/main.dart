@@ -9,6 +9,7 @@ import 'core/theme/theme_provider.dart';
 
 import 'core/sync/offline_cache_store.dart';
 import 'core/sync/sync_engine.dart';
+import 'core/location/country_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +48,7 @@ void main() async {
   final apiClient = ApiClient();
   final authState = AuthState(apiClient: apiClient);
   final themeProvider = ThemeProvider();
+  final countryProvider = CountryProvider();
   final cacheStore = await OfflineCacheStore.initialize();
   final syncEngine = SyncEngine(apiClient: apiClient, cacheStore: cacheStore);
 
@@ -55,6 +57,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
         ChangeNotifierProvider<AuthState>.value(value: authState),
+        ChangeNotifierProvider<CountryProvider>.value(value: countryProvider),
         Provider<OfflineCacheStore>.value(value: cacheStore),
         ChangeNotifierProvider<SyncEngine>.value(value: syncEngine),
       ],

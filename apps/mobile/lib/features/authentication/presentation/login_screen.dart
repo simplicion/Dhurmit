@@ -6,6 +6,8 @@ import '../../../core/api/auth_state.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/one_eighty_auth_button.dart';
 import '../../../core/widgets/one_eighty_launcher.dart';
+import '../../../core/location/country_provider.dart';
+import '../../../core/location/country_picker_bottom_sheet.dart';
 
 /// Primary Splash Screen for Dhurmit.
 /// Clean, minimalist, and focused:
@@ -215,7 +217,47 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+
+                  // ─── COUNTRY & CURRENCY SELECTION CHIP (OpenStreetMap) ───
+                  Consumer<CountryProvider>(
+                    builder: (context, countryProvider, _) {
+                      final country = countryProvider.activeCountry;
+                      return Center(
+                        child: InkWell(
+                          onTap: () => CountryPickerBottomSheet.show(context),
+                          borderRadius: BorderRadius.circular(20),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: tokens.surfaceVariant.withValues(alpha: 0.6),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: tokens.outlineVariant),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(country.flag, style: const TextStyle(fontSize: 16)),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${country.name} (${country.currencyCode} ${country.currencySymbol})',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: tokens.onSurface,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Icon(Icons.arrow_drop_down_rounded, size: 18, color: tokens.onSurfaceVariant),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 20),
 
                   // ─── ROLE SELECTOR: ORGANIZER VS COMMUNITY MEMBER ───
                   Container(

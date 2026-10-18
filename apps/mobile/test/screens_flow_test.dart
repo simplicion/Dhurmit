@@ -13,10 +13,13 @@ import 'package:committee_ledger_mobile/features/authentication/presentation/log
 import 'package:committee_ledger_mobile/features/home/presentation/home_dashboard_screen.dart';
 import 'package:committee_ledger_mobile/features/calendar/presentation/calendar_screen.dart';
 
+import 'package:committee_ledger_mobile/core/location/country_provider.dart';
+
 Widget wrapAppShell(
   Widget child, {
   ThemeProvider? themeProvider,
   AuthState? authState,
+  CountryProvider? countryProvider,
   SyncEngine? syncEngine,
   OfflineCacheStore? cacheStore,
 }) {
@@ -28,6 +31,9 @@ Widget wrapAppShell(
       ),
       ChangeNotifierProvider<AuthState>(
         create: (_) => authState ?? AuthState(apiClient: client),
+      ),
+      ChangeNotifierProvider<CountryProvider>(
+        create: (_) => countryProvider ?? CountryProvider(),
       ),
       if (cacheStore != null) Provider<OfflineCacheStore>.value(value: cacheStore),
       if (syncEngine != null) ChangeNotifierProvider<SyncEngine>.value(value: syncEngine),

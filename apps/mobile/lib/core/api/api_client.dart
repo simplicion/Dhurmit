@@ -31,10 +31,13 @@ class ApiClient {
   }
 
   final String baseUrl;
+  final http.Client _client;
   String? authToken;
   String? workspaceId;
 
-  ApiClient({String? baseUrl}) : baseUrl = baseUrl ?? defaultBaseUrl;
+  ApiClient({String? baseUrl, http.Client? httpClient})
+      : baseUrl = baseUrl ?? defaultBaseUrl,
+        _client = httpClient ?? http.Client();
 
   Map<String, String> _buildHeaders({String? idempotencyKey}) {
     final headers = {
@@ -56,13 +59,13 @@ class ApiClient {
 
   Future<dynamic> get(String path) async {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await http.get(uri, headers: _buildHeaders());
+    final response = await _client.get(uri, headers: _buildHeaders());
     return _handleResponse(response);
   }
 
   Future<dynamic> post(String path, {Map<String, dynamic>? body, String? idempotencyKey}) async {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await http.post(
+    final response = await _client.post(
       uri,
       headers: _buildHeaders(idempotencyKey: idempotencyKey),
       body: body != null ? jsonEncode(body) : null,
@@ -72,7 +75,7 @@ class ApiClient {
 
   Future<dynamic> patch(String path, {Map<String, dynamic>? body}) async {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await http.patch(
+    final response = await _client.patch(
       uri,
       headers: _buildHeaders(),
       body: body != null ? jsonEncode(body) : null,
@@ -82,7 +85,7 @@ class ApiClient {
 
   Future<dynamic> delete(String path, {String? idempotencyKey}) async {
     final uri = Uri.parse('$baseUrl$path');
-    final response = await http.delete(
+    final response = await _client.delete(
       uri,
       headers: _buildHeaders(idempotencyKey: idempotencyKey),
     );

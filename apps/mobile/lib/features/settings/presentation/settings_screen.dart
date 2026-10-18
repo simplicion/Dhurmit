@@ -5,6 +5,8 @@ import '../../../core/api/auth_state.dart';
 import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/sync/sync_engine.dart';
+import '../../../core/location/country_provider.dart';
+import '../../../core/location/country_picker_bottom_sheet.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -297,7 +299,97 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
             const SizedBox(height: 16),
 
-            // ─── 2. THEME & APPEARANCE CARD ───
+            // ─── 2. COUNTRY, CURRENCY & TIME ZONE CARD (OpenStreetMap) ───
+            Consumer<CountryProvider>(
+              builder: (context, countryProvider, _) {
+                final country = countryProvider.activeCountry;
+                return Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: tokens.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: tokens.outlineVariant),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.public_rounded, color: tokens.primary),
+                          const SizedBox(width: 10),
+                          Text(
+                            'Country, Currency & Time Zone',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: tokens.onSurface,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Location service powered by OpenStreetMap. Automatically customizes currency symbols, ledger calculations, and calendar dates.',
+                        style: TextStyle(fontSize: 12, color: tokens.onSurfaceVariant),
+                      ),
+                      const SizedBox(height: 14),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: tokens.surfaceVariant.withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: tokens.outlineVariant),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(country.flag, style: const TextStyle(fontSize: 32)),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    country.name,
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                      color: tokens.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Currency: ${country.currencyCode} (${country.currencySymbol}) • ${country.timeZone}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: tokens.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: tokens.primary,
+                                foregroundColor: tokens.onPrimary,
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: () => CountryPickerBottomSheet.show(context),
+                              icon: const Icon(Icons.edit_location_alt_rounded, size: 14),
+                              label: const Text('Change', style: TextStyle(fontSize: 12)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // ─── 3. THEME & APPEARANCE CARD ───
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(

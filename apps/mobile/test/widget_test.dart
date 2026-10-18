@@ -7,6 +7,7 @@ import 'package:committee_ledger_mobile/core/api/api_client.dart';
 import 'package:committee_ledger_mobile/core/api/auth_state.dart';
 import 'package:committee_ledger_mobile/core/sync/offline_cache_store.dart';
 import 'package:committee_ledger_mobile/core/sync/sync_engine.dart';
+import 'package:committee_ledger_mobile/core/location/country_provider.dart';
 
 void main() {
   testWidgets('CommitteeLedgerApp initializes without error', (WidgetTester tester) async {
@@ -17,6 +18,7 @@ void main() {
     final apiClient = ApiClient(baseUrl: 'http://localhost:3000/api/v1');
     final authState = AuthState(apiClient: apiClient);
     final themeProvider = ThemeProvider();
+    final countryProvider = CountryProvider();
     final syncEngine = SyncEngine(apiClient: apiClient, cacheStore: cacheStore);
 
     await tester.pumpWidget(
@@ -24,6 +26,7 @@ void main() {
         providers: [
           ChangeNotifierProvider<ThemeProvider>.value(value: themeProvider),
           ChangeNotifierProvider<AuthState>.value(value: authState),
+          ChangeNotifierProvider<CountryProvider>.value(value: countryProvider),
           Provider<OfflineCacheStore>.value(value: cacheStore),
           ChangeNotifierProvider<SyncEngine>.value(value: syncEngine),
         ],

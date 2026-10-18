@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../../core/api/auth_state.dart';
+import '../../../core/location/country_model.dart';
+import '../../../core/location/country_picker_bottom_sheet.dart';
+import '../../../core/location/country_provider.dart';
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/widgets/primary_button.dart';
 import '../../../core/widgets/money_input_field.dart';
@@ -19,6 +22,7 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
   final _nameController = TextEditingController();
   final _amountController = TextEditingController();
 
+  CountryProfile? _customCountry;
   DateTime _startDate = DateTime.now();
   int _durationCount = 10;
   final String _durationUnit = 'MONTH';
@@ -50,6 +54,15 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
     }
   }
 
+  Future<void> _selectCountry() async {
+    final country = await CountryPickerBottomSheet.show(context);
+    if (country != null) {
+      setState(() {
+        _customCountry = country;
+      });
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_amountPaisa <= BigInt.zero) {
@@ -63,12 +76,14 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
 
     try {
       final client = context.read<AuthState>().apiClient;
+      final countryProvider = context.read<CountryProvider>();
+      final effectiveCountry = _customCountry ?? countryProvider.activeCountry;
       final startDateStr = DateFormat('yyyy-MM-dd').format(_startDate);
 
       await client.post('/committees', body: {
         'name': _nameController.text.trim(),
-        'currencyCode': 'NPR',
-        'timezone': 'Asia/Kathmandu',
+        'currencyCode': effectiveCountry.currencyCode,
+        'timezone': effectiveCountry.timeZone,
         'startDate': startDateStr,
         'duration': {
           'count': _durationCount,
@@ -104,6 +119,8 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
   @override
   Widget build(BuildContext context) {
     final tokens = context.watch<ThemeProvider>().tokens;
+    final countryProvider = context.watch<CountryProvider>();
+    final effectiveCountry = _customCountry ?? countryProvider.activeCountry;
 
     return Scaffold(
       appBar: AppBar(
@@ -117,6 +134,62 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // ─── Location & Country Selection Card ───
+                InkWell(
+                  onTap: _selectCountry,
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: tokens.surfaceVariant.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: tokens.outlineVariant),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(effectiveCountry.flag, style: const TextStyle(fontSize: 28)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    '${effectiveCountry.name} (${effectiveCountry.currencyCode})',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: tokens.onSurface,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(Icons.edit_location_alt_rounded, size: 14, color: tokens.primary),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Time Zone: ${effectiveCountry.timeZone} • OpenStreetMap',
+                                style: TextStyle(fontSize: 11, color: tokens.onSurfaceVariant),
+                              ),
+                            ],
+                          ),
+                        ),
+                        OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: _selectCountry,
+                          child: const Text('Change', style: TextStyle(fontSize: 12)),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -129,7 +202,7 @@ class _CreateCommitteeScreenState extends State<CreateCommitteeScreen> {
                 const SizedBox(height: 16),
                 MoneyInputField(
                   controller: _amountController,
-                  label: 'Contribution Amount per Member (NPR)',
+                  label: 'Contribution Amount per Member (${effectiveCountry.currencyCode})',
                   onChangedPaisa: (paisa) {
                     setState(() {
                       _amountPaisa = paisa;

@@ -1,30 +1,37 @@
 import 'package:intl/intl.dart';
 
 class AppMoney {
+  static String activeCurrencyCode = 'NPR';
+  static String activeLocale = 'en_IN';
+
   final BigInt minorUnits;
   final String currencyCode;
 
-  const AppMoney(this.minorUnits, {this.currencyCode = 'NPR'});
+  AppMoney(this.minorUnits, {String? currencyCode})
+      : currencyCode = currencyCode ?? activeCurrencyCode;
 
-  static AppMoney fromPaisa(dynamic paisa, {String currencyCode = 'NPR'}) {
-    if (paisa is BigInt) return AppMoney(paisa, currencyCode: currencyCode);
-    if (paisa is int) return AppMoney(BigInt.from(paisa), currencyCode: currencyCode);
+  static AppMoney fromPaisa(dynamic paisa, {String? currencyCode}) {
+    final code = currencyCode ?? activeCurrencyCode;
+    if (paisa is BigInt) return AppMoney(paisa, currencyCode: code);
+    if (paisa is int) return AppMoney(BigInt.from(paisa), currencyCode: code);
     if (paisa is String) {
-      return AppMoney(BigInt.tryParse(paisa) ?? BigInt.zero, currencyCode: currencyCode);
+      return AppMoney(BigInt.tryParse(paisa) ?? BigInt.zero, currencyCode: code);
     }
-    return AppMoney(BigInt.zero, currencyCode: currencyCode);
+    return AppMoney(BigInt.zero, currencyCode: code);
   }
 
-  static AppMoney fromRupees(double rupees, {String currencyCode = 'NPR'}) {
+  static AppMoney fromRupees(double rupees, {String? currencyCode}) {
+    final code = currencyCode ?? activeCurrencyCode;
     final paisa = (rupees * 100).round();
-    return AppMoney(BigInt.from(paisa), currencyCode: currencyCode);
+    return AppMoney(BigInt.from(paisa), currencyCode: code);
   }
 
-  static AppMoney fromRupeesString(String val, {String currencyCode = 'NPR'}) {
+  static AppMoney fromRupeesString(String val, {String? currencyCode}) {
+    final code = currencyCode ?? activeCurrencyCode;
     final trimmed = val.trim();
-    if (trimmed.isEmpty) return AppMoney(BigInt.zero, currencyCode: currencyCode);
+    if (trimmed.isEmpty) return AppMoney(BigInt.zero, currencyCode: code);
     final parsed = double.tryParse(trimmed) ?? 0.0;
-    return fromRupees(parsed, currencyCode: currencyCode);
+    return fromRupees(parsed, currencyCode: code);
   }
 
   double toRupees() {
@@ -68,7 +75,7 @@ class AppMoney {
     final rupees = absUnits ~/ BigInt.from(100);
     final paisa = (absUnits % BigInt.from(100)).toInt();
 
-    final formatter = NumberFormat('#,##,##0', 'en_IN');
+    final formatter = NumberFormat('#,##,##0', activeLocale);
     final formattedRupees = formatter.format(rupees.toInt());
     final formattedPaisa = paisa.toString().padLeft(2, '0');
 
@@ -80,7 +87,7 @@ class AppMoney {
     final isNegative = minorUnits < BigInt.zero;
     final absUnits = isNegative ? -minorUnits : minorUnits;
     final rupees = (absUnits ~/ BigInt.from(100)).toInt();
-    final formatter = NumberFormat('#,##,##0', 'en_IN');
+    final formatter = NumberFormat('#,##,##0', activeLocale);
     final sign = isNegative ? '-' : '';
     return '$sign$currencyCode ${formatter.format(rupees)}';
   }
